@@ -29,3 +29,6 @@ https://github.com/users/tanxiaoo/projects/3
 
 ## UI Design
 https://www.figma.com/design/X7DVIN2erz5rWOT4u49rsb/MAPP?node-id=32-31&t=mdZQRqfAm9oMUJJ8-1
+
+## Android Virtual Device (AVD) for develop
+Pixel 5 API 35  6.0 1080x2340 440dpi
