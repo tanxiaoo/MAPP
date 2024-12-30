@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 import '../components/yellow_button.dart';
 import '../const.dart';
 
-class ListPage extends StatefulWidget {
-  const ListPage({super.key});
+class PayPage extends StatefulWidget {
+  const PayPage({super.key});
 
   @override
-  State<ListPage> createState() => _ListPageState();
+  State<PayPage> createState() => _PayPageState();
 }
 
-class _ListPageState extends State<ListPage> {
+class _PayPageState extends State<PayPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("list"),
+        title: const Text("Buy Tickets"),
         titleTextStyle: const TextStyle(
           color: AppColors.white,
           fontSize: 14,
@@ -28,25 +29,20 @@ class _ListPageState extends State<ListPage> {
           child: Stack(
             children: [
               Center(
-                child: Text("list page content"),
+                child: Text("pay page content"),
               ),
             ],
           )),
       bottomNavigationBar: Padding(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-          child:
-              Row(
+          child:Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly, 
                 children: [
                   YellowButton(
+                    width: 300,
                     onPressed: () {},
-                    iconUrl: 'lib/images/plan_lists.svg',
-                    label: "Plan Lists",
-                  ),
-                  YellowButton(
-                    onPressed: () {},
-                    iconUrl: 'lib/images/plan_favorites.svg',
-                    label: "Plan Favorites",
+                    iconUrl: 'lib/images/Card.svg',
+                    label: "Pay",
                   ),
           ])),
     );

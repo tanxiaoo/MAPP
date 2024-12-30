@@ -5,6 +5,8 @@ import '../pages/home.dart';
 import '../pages/plan.dart';
 import '../pages/list.dart';
 import '../pages/me.dart';
+import '../pages/detail.dart';
+import '../pages/pay.dart';
 
 class AppPage {
   static final routers = [
@@ -13,5 +15,7 @@ class AppPage {
     GetPage(name: "/plan", page: () => const PlanPage()),
     GetPage(name: "/list", page: () => const ListPage()),
     GetPage(name: "/me", page: () => const MePage()),
+    GetPage(name: "/detail", page: () => const DetailPage()),
+    GetPage(name: "/pay", page: () => const PayPage()),
   ];
 }

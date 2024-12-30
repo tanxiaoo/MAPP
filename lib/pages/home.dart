@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -14,8 +15,17 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: const Text("home"),
       ),
-      body: const Text("home page content"),
+      body: Center(
+          child: Column(
+        children: [
+          const Text("home page content"),
+          TextButton(
+              onPressed: () {
+                Get.toNamed("/detail");
+              },
+              child: const Text("Details"))
+        ],
+      )),
     );
   }
 }
-

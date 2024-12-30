@@ -4,19 +4,19 @@ import 'package:get/get.dart';
 import '../components/yellow_button.dart';
 import '../const.dart';
 
-class PlanPage extends StatefulWidget {
-  const PlanPage({super.key});
+class DetailPage extends StatefulWidget {
+  const DetailPage({super.key});
 
   @override
-  State<PlanPage> createState() => _PlanPageState();
+  State<DetailPage> createState() => _DetailPageState();
 }
 
-class _PlanPageState extends State<PlanPage> {
+class _DetailPageState extends State<DetailPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Plan"),
+        title: const Text("Attraction Name"),
         titleTextStyle: const TextStyle(
           color: AppColors.white,
           fontSize: 14,
@@ -29,7 +29,7 @@ class _PlanPageState extends State<PlanPage> {
           child: Stack(
             children: [
               Center(
-                child: Text("plan page content"),
+                child: Text("Attraction page content"),
               ),
             ],
           )),
@@ -38,16 +38,16 @@ class _PlanPageState extends State<PlanPage> {
           child:
               Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
             YellowButton(
-              onPressed: () {},
-              iconUrl: 'lib/images/plan_save.svg',
-              label: "Save Plan",
+              onPressed: () {
+                Get.toNamed("/plan");
+              },
+              iconUrl: 'lib/images/visit.svg',
+              label: "Visit Here",
             ),
             YellowButton(
-              onPressed: () {
-                Get.toNamed("./pay");
-              },
-              iconUrl: 'lib/images/Card.svg',
-              label: "Buy Tickets",
+              onPressed: () {},
+              iconUrl: 'lib/images/plan_favorites.svg',
+              label: "Add List",
             ),
           ])),
     );
