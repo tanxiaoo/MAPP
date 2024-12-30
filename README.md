@@ -26,3 +26,6 @@ By combining these features with user-friendly design and robust technology, the
 
 ## ToDo List links
 https://github.com/users/tanxiaoo/projects/3
+
+## UI Design
+https://www.figma.com/design/X7DVIN2erz5rWOT4u49rsb/MAPP?node-id=32-31&t=mdZQRqfAm9oMUJJ8-1
