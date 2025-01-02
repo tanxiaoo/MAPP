@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 import '../components/yellow_button.dart';
 import '../const.dart';
@@ -23,6 +22,8 @@ class _PayPageState extends State<PayPage> {
           fontWeight: FontWeight.bold,
         ),
         backgroundColor: AppColors.green,
+        iconTheme: const IconThemeData(
+          color: AppColors.white, )
       ),
       body: const Padding(
           padding: EdgeInsets.fromLTRB(16, 0, 16, 0),

@@ -32,3 +32,6 @@ https://www.figma.com/design/X7DVIN2erz5rWOT4u49rsb/MAPP?node-id=32-31&t=mdZQRqf
 
 ## Android Virtual Device (AVD) for develop
 Pixel 5 API 35  6.0 1080x2340 440dpi
+
+## Add Firebase to your Flutter app
+https://firebase.google.com/docs/flutter/setup?platform=android

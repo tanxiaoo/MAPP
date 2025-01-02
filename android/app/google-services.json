@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "831346138612",
+    "project_id": "trenord-travel",
+    "storage_bucket": "trenord-travel.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:831346138612:android:69ce2830b57cde3a146da1",
+        "android_client_info": {
+          "package_name": "com.example.flutter_application_1"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD1yTlF-cCZoLzV_EKH1Xlo6_L-PrjCEXA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
