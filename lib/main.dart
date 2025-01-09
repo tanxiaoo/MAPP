@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -11,6 +12,9 @@ void main() async {
   await Firebase.initializeApp(
   options: DefaultFirebaseOptions.currentPlatform,
 );
+
+  await FirebaseAuth.instance.signOut();
+
   runApp(const MyApp());
 }
 
@@ -29,7 +33,7 @@ class MyApp extends StatelessWidget {
           appBarTheme: const AppBarTheme(
             centerTitle: true,
           )),
-      initialRoute: "/login",
+      initialRoute: "/auth_page",
       defaultTransition: Transition.rightToLeft,
       getPages: AppPage.routers,
     );

@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_application_1/pages/login.dart';
 
 import '../pages/tabs.dart';
-import '../pages/login.dart';
-import '../pages/me.dart';
 
 class AuthPage extends StatelessWidget {
   const AuthPage({super.key});
@@ -14,6 +13,10 @@ class AuthPage extends StatelessWidget {
       body: StreamBuilder<User?>(
           stream: FirebaseAuth.instance.authStateChanges(),
           builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
             //user is logged in
             if (snapshot.hasData) {
               return Tabs();
@@ -21,7 +24,7 @@ class AuthPage extends StatelessWidget {
 
             //user is not loged in
             else {
-              return MePage();
+              return LoginPage();
             }
           }),
     );

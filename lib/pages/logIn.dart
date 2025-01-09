@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import '../const.dart';
 import '../components/my_textfield.dart';
 import '../components/yellow_button.dart';
@@ -18,10 +18,37 @@ class _LoginPageState extends State<LoginPage> {
   final passwordController = TextEditingController();
 
   void signUserIn() async {
-    await FirebaseAuth.instance.signInWithEmailAndPassword(
-      email: emailController.text, 
-      password: passwordController.text
-    );
+    // show loading circle
+    showDialog(
+        context: context,
+        builder: (context) {
+          return const Center(child: CircularProgressIndicator());
+        });
+
+    // try sign in
+    try {
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: emailController.text,
+        password: passwordController.text,
+      );
+      Get.offNamed('/auth_page');
+      navigator?.pop(context);
+    } on FirebaseAuthException catch (e) {
+      navigator?.pop(context);
+      if (e.code == "user-not-found") {
+        Get.snackbar("Error", "User not found. Please register first.",
+            snackPosition: SnackPosition.BOTTOM);
+      } else if (e.code == "wrong-password") {
+        Get.snackbar("Error", "Incorrect password. Please try again.",
+            snackPosition: SnackPosition.BOTTOM);
+      } else {
+        Get.snackbar("Error", "Invalid credentials. Please try again.",
+            snackPosition: SnackPosition.BOTTOM);
+      }
+    } catch (e) {
+      Get.snackbar("Error", "Unexpected error occurred.",
+          snackPosition: SnackPosition.BOTTOM);
+    }
   }
 
   @override

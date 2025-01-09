@@ -1,4 +1,6 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 import '../components/yellow_button.dart';
 import '../const.dart';
@@ -11,6 +13,7 @@ class MePage extends StatefulWidget {
 }
 
 class _MePageState extends State<MePage> {
+  final user = FirebaseAuth.instance.currentUser;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -23,26 +26,32 @@ class _MePageState extends State<MePage> {
         ),
         backgroundColor: AppColors.green,
       ),
-      body: const Padding(
-          padding: EdgeInsets.fromLTRB(16, 0, 16, 0),
+      body: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
           child: Stack(
             children: [
               Center(
-                child: Text("list page content"),
+                child: Column(
+                  children: [
+                    const Text("list page content"),
+                    Text(user?.email ?? "No email available"),
+                  ],
+                ),
               ),
             ],
           )),
       bottomNavigationBar: Padding(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-          child:Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly, 
-                children: [
-                  YellowButton(
-                    width: 300,
-                    onPressed: () {},
-                    iconUrl: 'lib/images/Logout.svg',
-                    label: "Log Out",
-                  ),
+          child:
+              Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+            YellowButton(
+              width: 300,
+              onPressed: () {
+                FirebaseAuth.instance.signOut();
+              },
+              iconUrl: 'lib/images/Logout.svg',
+              label: "Log Out",
+            ),
           ])),
     );
   }
