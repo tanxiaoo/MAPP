@@ -1,6 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:firebase_ui_oauth_google/firebase_ui_oauth_google.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 import '../components/yellow_button.dart';
 import '../const.dart';
@@ -48,6 +50,7 @@ class _MePageState extends State<MePage> {
               width: 300,
               onPressed: () {
                 FirebaseAuth.instance.signOut();
+                GoogleSignIn().disconnect();
               },
               iconUrl: 'lib/images/Logout.svg',
               label: "Log Out",

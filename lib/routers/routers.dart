@@ -9,6 +9,7 @@ import '../pages/detail.dart';
 import '../pages/pay.dart';
 import '../pages/login.dart';
 import '../pages/auth_page.dart';
+import '../pages/register.dart';
 
 class AppPage {
   static final routers = [
@@ -21,5 +22,6 @@ class AppPage {
     GetPage(name: "/pay", page: () => const PayPage()),
     GetPage(name: "/login", page: () => const LoginPage()),
     GetPage(name: "/auth_page", page: () => const AuthPage()),
+    GetPage(name: "/register", page: () => const RegisterPage()),
   ];
 }

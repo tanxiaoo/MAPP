@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../const.dart';
 import '../components/my_textfield.dart';
 import '../components/yellow_button.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -31,8 +32,8 @@ class _LoginPageState extends State<LoginPage> {
         email: emailController.text,
         password: passwordController.text,
       );
-      Get.offNamed('/auth_page');
       navigator?.pop(context);
+      Get.offNamed('/auth_page');
     } on FirebaseAuthException catch (e) {
       navigator?.pop(context);
       if (e.code == "user-not-found") {
@@ -51,11 +52,104 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  void signInWithGoogle() async {
+    try {
+      // show loading circle
+      showDialog(
+        context: context,
+        builder: (context) {
+          return const Center(child: CircularProgressIndicator());
+        },
+      );
+
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      if (googleUser == null) {
+        navigator?.pop(context);
+        return;
+      }
+
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+
+      final OAuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      await FirebaseAuth.instance.signInWithCredential(credential);
+
+      Get.offNamed('/auth_page');
+      navigator?.pop(context);
+    } catch (e) {
+      navigator?.pop(context);
+      Get.snackbar(
+        "Error",
+        "Google Sign-In failed. Please try again.",
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
+  }
+
+  void resetPassword() {
+    TextEditingController emailController = TextEditingController();
+
+    Get.dialog(
+      AlertDialog(
+        title: const Text("Reset Password"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              "Enter your email to receive a password reset link.",
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: emailController,
+              decoration: const InputDecoration(
+                hintText: "Email",
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Get.back(); // 关闭对话框
+            },
+            child: const Text("Cancel"),
+          ),
+          TextButton(
+            onPressed: () async {
+              try {
+                await FirebaseAuth.instance.sendPasswordResetEmail(
+                  email: emailController.text.trim(),
+                );
+                Get.back(); // 关闭对话框
+                Get.snackbar(
+                  "Success",
+                  "Password reset link sent! Check your email.",
+                  snackPosition: SnackPosition.BOTTOM,
+                );
+              } catch (e) {
+                Get.back(); // 关闭对话框
+                Get.snackbar(
+                  "Error",
+                  "Failed to send reset email. Please try again.",
+                  snackPosition: SnackPosition.BOTTOM,
+                );
+              }
+            },
+            child: const Text("Submit"),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     //local variables
     double screenWidth = MediaQuery.of(context).size.width;
-
     return Scaffold(
         backgroundColor: AppColors.lightGreen,
         body: SingleChildScrollView(
@@ -118,11 +212,14 @@ class _LoginPageState extends State<LoginPage> {
                   height: 15,
                 ),
                 //forget password?
-                const Text(
-                  "Forget Password?",
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: Colors.grey,
+                GestureDetector(
+                  onTap: resetPassword,
+                  child: const Text(
+                    "Forget Password?",
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: Colors.grey,
+                    ),
                   ),
                 ),
                 const SizedBox(
@@ -169,36 +266,44 @@ class _LoginPageState extends State<LoginPage> {
                 //google sign in buttons
                 SizedBox(
                   height: 40,
-                  child: Image.asset(
-                    "lib/images/google.png",
-                    fit: BoxFit.cover,
+                  child: GestureDetector(
+                    onTap: signInWithGoogle,
+                    child: Image.asset(
+                      "lib/images/google.png",
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 ),
                 const SizedBox(
                   height: 15,
                 ),
                 //Don't have any account? Register now
-                const Row(
+                Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
-                      "Don't have any account? Register now",
+                    const Text(
+                      "Don't have any account?",
                       style: TextStyle(
                         fontSize: 10,
                         color: Colors.grey,
                       ),
                     ),
-                    SizedBox(
+                    const SizedBox(
                       width: 4,
                     ),
-                    Text(
-                      "Register now",
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.yellow,
+                    GestureDetector(
+                      onTap: () {
+                        Get.toNamed("/register");
+                      },
+                      child: Text(
+                        "Register now",
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.yellow,
+                        ),
                       ),
-                    ),
+                    )
                   ],
                 )
               ],
