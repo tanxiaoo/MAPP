@@ -114,7 +114,7 @@ class _LoginPageState extends State<LoginPage> {
         actions: [
           TextButton(
             onPressed: () {
-              Get.back(); // 关闭对话框
+              Get.back(); 
             },
             child: const Text("Cancel"),
           ),
@@ -124,14 +124,14 @@ class _LoginPageState extends State<LoginPage> {
                 await FirebaseAuth.instance.sendPasswordResetEmail(
                   email: emailController.text.trim(),
                 );
-                Get.back(); // 关闭对话框
+                Get.back();
                 Get.snackbar(
                   "Success",
                   "Password reset link sent! Check your email.",
                   snackPosition: SnackPosition.BOTTOM,
                 );
               } catch (e) {
-                Get.back(); // 关闭对话框
+                Get.back(); 
                 Get.snackbar(
                   "Error",
                   "Failed to send reset email. Please try again.",
