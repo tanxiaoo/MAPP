@@ -5,7 +5,6 @@ import 'package:geocoding/geocoding.dart';
 import '../components/my_textfield.dart';
 import '../components/attraction_card.dart';
 import '../data/listData.dart';
-import '../const.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
