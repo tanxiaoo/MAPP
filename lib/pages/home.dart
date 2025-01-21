@@ -17,19 +17,50 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   late GoogleMapController mapController;
   final TextEditingController _searchController = TextEditingController();
-  final LatLng _center = const LatLng(45.521563, -122.677433);
+  final LatLng _center = const LatLng(45.464211, 9.191383);
+
+  final Set<Marker> _markers = {};
 
   void _onMapCreated(GoogleMapController controller) {
     mapController = controller;
+    setState(() {
+      for (var attrtaction in listData) {
+        final coordinates = attrtaction["coordinates"];
+        final marker = Marker(
+          markerId: MarkerId(attrtaction["title"]),
+          position: LatLng(coordinates["latitude"], coordinates["longitude"]),
+          infoWindow: InfoWindow(
+            title: attrtaction["title"],
+          ),
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen), 
+        );
+        _markers.add(marker);
+      }
+      
+      _markers.add(Marker(
+        markerId: const MarkerId("sourceLocation"),
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+        position: _center,
+      ));
+    });
   }
 
   Future<void> _searchPlace(String value) async {
     try {
       List<Location> locations = await locationFromAddress(value);
       if (locations.isNotEmpty) {
-        mapController.animateCamera(CameraUpdate.newLatLng(
-          LatLng(locations.first.latitude, locations.first.longitude),
-        ));
+        LatLng newPosition =
+            LatLng(locations.first.latitude, locations.first.longitude);
+        mapController.animateCamera(CameraUpdate.newLatLng(newPosition));
+
+        setState(() {
+          _markers.clear();
+          _markers.add(Marker(
+            markerId: const MarkerId("searchedLocation"),
+            icon: BitmapDescriptor.defaultMarker,
+            position: newPosition,
+          ));
+        });
       } else {
         print("No locations found for: $value");
       }
@@ -66,22 +97,29 @@ class _HomePageState extends State<HomePage> {
                 onMapCreated: _onMapCreated,
                 initialCameraPosition:
                     CameraPosition(target: _center, zoom: 11.0),
+                markers: _markers,
               ),
             ),
-            const SizedBox(height: 16,),
+            const SizedBox(
+              height: 16,
+            ),
             Container(
               height: 3,
               margin: const EdgeInsets.symmetric(horizontal: 180),
               decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(10)
-              ),
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(10)),
             ),
-            const SizedBox(height: 10,),
+            const SizedBox(
+              height: 10,
+            ),
             Text(
-            "${listData.length} sights",
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),),
-            const SizedBox(height: 10,),
+              "${listData.length} sights",
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(
+              height: 10,
+            ),
             Expanded(
               child: ListView.builder(
                 itemCount: listData.length,
@@ -97,7 +135,6 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
           ],
-        )
-      );
+        ));
   }
 }

@@ -12,6 +12,7 @@ List<Map<String, dynamic>> listData = [
       "https://www.itying.com/images/flutter/7.png",
     ],
     "distance": "0 km from Milan",
+    "coordinates": {"latitude": 45.464211, "longitude": 9.191383},
   },
   {
     "title": "Galleria Vittorio Emanuele II",
@@ -24,6 +25,7 @@ List<Map<String, dynamic>> listData = [
       "https://www.itying.com/images/flutter/3.png",
     ],
     "distance": "0.2 km from Milan",
+    "coordinates": {"latitude": 45.465421, "longitude": 9.189667},
   },
   {
     "title": "Sforza Castle",
@@ -36,6 +38,7 @@ List<Map<String, dynamic>> listData = [
       "https://www.itying.com/images/flutter/1.png",
     ],
     "distance": "1.5 km from Milan",
+    "coordinates": {"latitude": 45.470341, "longitude": 9.179784},
   },
   {
     "title": "Lake Como",
@@ -48,6 +51,7 @@ List<Map<String, dynamic>> listData = [
       "https://www.itying.com/images/flutter/6.png",
     ],
     "distance": "50 km from Milan",
+    "coordinates": {"latitude": 46.016544, "longitude": 9.257221},
   },
   {
     "title": "Sirmione",
@@ -60,5 +64,6 @@ List<Map<String, dynamic>> listData = [
       "https://www.itying.com/images/flutter/4.png",
     ],
     "distance": "100 km from Milan",
+    "coordinates": {"latitude": 45.495711, "longitude": 10.606233},
   },
 ];
