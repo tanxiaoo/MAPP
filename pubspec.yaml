@@ -48,6 +48,8 @@ dependencies:
   flutter_dotenv: ^5.2.1
   location: ^7.0.1
   flutter_polyline_points: ^2.1.0
+  http: ^1.3.0
+  google_places_flutter: ^2.0.9
   
 
 dev_dependencies:
@@ -85,9 +87,17 @@ flutter:
     - lib/images/Logout.svg
     - lib/images/Card.svg
     - lib/images/plan_save.svg
+    - lib/images/start.svg
+    - lib/images/add.svg
+    - lib/images/end.svg
+    - lib/images/flag.svg
+
+    - lib/images/flag.png
 
     - lib/images/logo.png
     - lib/images/google.png
+    
+    - .env
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

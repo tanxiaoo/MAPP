@@ -3,12 +3,12 @@ import 'package:flutter_svg/svg.dart';
 import '../const.dart';
 import 'package:get/get.dart';
 
-class AttractionCard extends StatelessWidget {
+class AttractionCard1 extends StatelessWidget {
   final String title;
   final String description;
   final List<String> imageUrls;
   final String distance;
-  const AttractionCard(
+  const AttractionCard1(
       {super.key,
       required this.title,
       required this.description,
@@ -50,7 +50,7 @@ class AttractionCard extends StatelessWidget {
                       fit: BoxFit.cover,
                       loadingBuilder: (context, child, loadingProgress) {
                         if (loadingProgress == null) return child;
-                        return const Center(child: CircularProgressIndicator()); // 显示加载进度
+                        return const Center(child: CircularProgressIndicator()); 
                       },
                       errorBuilder: (context, error, stackTrace) {
                         return const Center(child: Icon(Icons.error, color: Colors.red));
@@ -136,18 +136,18 @@ class AttractionCard extends StatelessWidget {
               ),
               const SizedBox(width: 5),
               GestureDetector(
-                      onTap: () {
-                        Get.toNamed("/plan");
-                      },
-                      child: Text(
-                        "Details",
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.yellow,
-                        ),
-                      ),
-                    ),
+                onTap: () {
+                  Get.toNamed("/plan");
+                },
+                child: Text(
+                  "Details",
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.yellow,
+                  ),
+                ),
+              ),
             ],
           )
         ],

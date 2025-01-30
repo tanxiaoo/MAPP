@@ -29,7 +29,7 @@ List<Map<String, dynamic>> listData = [
   },
   {
     "title": "Sforza Castle",
-    "description": "A grand medieval castle housing museums and surrounded by beautiful parks.",
+    "description": "A castle housing museums and surrounded by beautiful parks.",
     "imageUrls": [
       "https://www.itying.com/images/flutter/4.png",
       "https://www.itying.com/images/flutter/5.png",

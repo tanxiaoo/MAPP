@@ -1,13 +1,24 @@
+import 'dart:convert';
+import 'dart:math';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../components/yellow_button.dart';
 import '../const.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geocoding/geocoding.dart' as geocoding;
-import '../components/attraction_card.dart';
+import '../components/attraction_card2.dart';
 import '../data/listData.dart';
 import 'package:location/location.dart' as location;
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
+import 'package:google_places_flutter/google_places_flutter.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'dart:ui' as ui;
+import 'dart:typed_data';
+import '../components/customMarker.dart';
+import '../components/plan_save_card.dart';
 
 class PlanPage extends StatefulWidget {
   const PlanPage({super.key});
@@ -20,6 +31,7 @@ class _PlanPageState extends State<PlanPage> {
   late GoogleMapController mapController;
   final TextEditingController _currentLocationController =
       TextEditingController();
+  final TextEditingController _midPointController = TextEditingController();
   final TextEditingController _destinationController = TextEditingController();
   final LatLng _center = const LatLng(45.464211, 9.191383);
   final Set<Marker> _markers = {};
@@ -28,18 +40,87 @@ class _PlanPageState extends State<PlanPage> {
   final Set<Polyline> _polylines = {};
   final List<LatLng> polylineCoordinates = [];
   PolylinePoints polylinePoints = PolylinePoints();
-  final String googleAPiKey = "AIzaSyD_VJTifAmwwH6J3TUJrKYcGqo5J33tsZk";
+  final String googleAPiKey = dotenv.env['GOOGLE_API_KEY'] ?? '';
   LatLng? _currentLatLng;
-  LatLng? _destinationLatLng; 
+  LatLng? _midPointLatLng;
+  LatLng? _destinationLatLng;
 
-  void _onMapCreated(GoogleMapController controller) {
+  Map<String, dynamic>? _selectedAttraction;
+  final List<LatLng> waypoints = [];
+  final List<String> waypointsTitles = [];
+
+  void _onMapCreated(GoogleMapController controller) async {
     mapController = controller;
-    setState(() {
-      _markers.add(Marker(
-        markerId: const MarkerId("sourceLocation"),
-        icon: BitmapDescriptor.defaultMarker,
-        position: _center,
+    _updateMarker();
+  }
+
+  void _updateMarker() async {
+    Set<Marker> updatedMarkers = {};
+
+    final BitmapDescriptor customIcon =
+        await CustomMarker.createCustomIconWithImage(
+      imageUrl: 'lib/images/flag.png',
+    );
+    for (var attraction in listData) {
+      final coordinates = LatLng(
+        attraction["coordinates"]["latitude"],
+        attraction["coordinates"]["longitude"],
+      );
+
+      if (!waypoints.contains(coordinates)) {
+        updatedMarkers.add(Marker(
+          markerId: MarkerId(attraction["title"]),
+          position: coordinates,
+          infoWindow: InfoWindow(
+            title: attraction["title"],
+          ),
+          icon: customIcon,
+          onTap: () {
+            setState(() {
+              _selectedAttraction = attraction;
+            });
+          },
+        ));
+      }
+    }
+
+    for (int i = 0; i < waypoints.length; i++) {
+      final customMarker =
+          await CustomMarker.createNumberedMarker(index: i + 1);
+      updatedMarkers.add(Marker(
+        markerId: MarkerId("waypoint_$i"),
+        position: waypoints[i],
+        icon: customMarker,
       ));
+    }
+
+    if (_currentLatLng != null) {
+      updatedMarkers.add(Marker(
+        markerId: const MarkerId("currentLocation"),
+        position: _currentLatLng!,
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
+      ));
+    }
+
+    if (_midPointLatLng != null) {
+      updatedMarkers.add(Marker(
+        markerId: const MarkerId("midPoint"),
+        position: _midPointLatLng!,
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange),
+      ));
+    }
+
+    if (_destinationLatLng != null) {
+      updatedMarkers.add(Marker(
+        markerId: const MarkerId("destination"),
+        position: _destinationLatLng!,
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueViolet),
+      ));
+    }
+
+    setState(() {
+      _markers.clear();
+      _markers.addAll(updatedMarkers);
     });
   }
 
@@ -53,28 +134,23 @@ class _PlanPageState extends State<PlanPage> {
 
         if (markerId == "currentLocation") {
           _currentLatLng = newPosition;
+        } else if (markerId == "midPoint") {
+          _midPointLatLng = newPosition;
         } else if (markerId == "destination") {
           _destinationLatLng = newPosition;
         }
 
         mapController.animateCamera(CameraUpdate.newLatLng(newPosition));
 
-        setState(() {
-          _markers.removeWhere((marker) => marker.markerId.value == markerId);
-          _markers.add(Marker(
-            markerId: MarkerId(markerId),
-            icon: BitmapDescriptor.defaultMarkerWithHue(
-              markerId == "currentLocation"
-                  ? BitmapDescriptor.hueGreen
-                  : BitmapDescriptor.hueViolet,
-            ),
-            position: newPosition,
-          ));
-        });
+        _updateMarker();
 
-        if (_currentLatLng != null && _destinationLatLng != null) {
-          _getPolyline();
-        }
+        _addWaypoint({
+          "title": value,
+          "coordinates": {
+            "latitude": newPosition.latitude,
+            "longitude": newPosition.longitude
+          }
+        });
       } else {
         print("No locations found for: $value");
       }
@@ -102,166 +178,242 @@ class _PlanPageState extends State<PlanPage> {
       _currentLatLng = currentPosition;
       mapController
           .animateCamera(CameraUpdate.newLatLngZoom(currentPosition, 14));
+
+      // get the name of current location
+      String placeName = await _getPlaceNameFromLocation(
+          currentPosition.latitude, currentPosition.longitude);
       setState(() {
-        _markers.removeWhere(
-            (marker) => marker.markerId.value == "currentLocation");
-        _markers.add(Marker(
-          markerId: const MarkerId("currentLocation"),
-          icon:
-              BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
-          position: currentPosition,
-        ));
+        _currentLocationController.text = placeName;
       });
+
+      _addWaypoint({
+        "title": placeName.isNotEmpty ? placeName : "current location",
+        "coordinates": {
+          "latitude": currentPosition.latitude,
+          "longitude": currentPosition.longitude
+        }
+      });
+      _updateMarker();
     } catch (e) {
       print("Error fetching location: $e");
     }
   }
 
-  Future<void> _getPolyline() async {
-    if (_currentLatLng == null || _destinationLatLng == null) return;
+  Future<String> _getPlaceNameFromLocation(
+      double latitude, double longitude) async {
+    try {
+      final String url =
+          "https://maps.googleapis.com/maps/api/place/nearbysearch/json"
+          "?location=$latitude,$longitude&rankby=distance&key=$googleAPiKey";
 
-    PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
-        googleApiKey: googleAPiKey,
-        request: PolylineRequest(
-            origin: PointLatLng(
-                _currentLatLng!.latitude, _currentLatLng!.longitude),
-            destination: PointLatLng(
-                _destinationLatLng!.latitude, _destinationLatLng!.longitude),
-            mode: TravelMode.driving));
-    
-    if (result.points.isNotEmpty) {
-      polylineCoordinates.clear();
-      for (PointLatLng point in result.points) {
-        polylineCoordinates.add(LatLng(point.latitude, point.longitude));
+      final response = await http.get(Uri.parse(url));
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data["results"].isNotEmpty) {
+          return data["results"][0]["name"] ?? "Unknown Place";
+        }
+        return "No Place Found";
+      } else {
+        return "Error: ${response.statusCode}";
       }
-      _addPolyLine();
+    } catch (e) {
+      print("Error fetching place name: $e");
+      return "Unknown Place";
+    }
+  }
+
+  void _addWaypoint(Map<String, dynamic>? attraction) async {
+    if (attraction == null) return;
+
+    LatLng newPoint = LatLng(
+      attraction["coordinates"]["latitude"],
+      attraction["coordinates"]["longitude"],
+    );
+
+    if (!waypoints.contains(newPoint)) {
+      setState(() {
+        waypoints.add(newPoint);
+        waypointsTitles.add(attraction["title"]);
+        _selectedAttraction = null;
+      });
+
+      _updateMarker();
+      if (waypoints.length >= 2) {
+        _getPolyline(waypoints);
+      }
+    }
+  }
+
+  Future<void> _getPolyline(List<LatLng> waypoints) async {
+    if (waypoints.length < 2) return;
+
+    List<LatLng> newPolylineCoordinates = [];
+
+    for (int i = 0; i < waypoints.length - 1; i++) {
+      List<LatLng> segment =
+          await _requestRoute(waypoints[i], waypoints[i + 1]);
+      newPolylineCoordinates.addAll(segment);
+    }
+
+    setState(() {
+      _polylines.clear();
+      polylineCoordinates.clear();
+      polylineCoordinates.addAll(newPolylineCoordinates);
+    });
+
+    _addPolyLine();
+  }
+
+  Future<List<LatLng>> _requestRoute(LatLng start, LatLng end) async {
+    PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
+      googleApiKey: googleAPiKey,
+      request: PolylineRequest(
+          origin: PointLatLng(start.latitude, start.longitude),
+          destination: PointLatLng(end.latitude, end.longitude),
+          mode: TravelMode.walking),
+    );
+
+    if (result.points.isNotEmpty) {
+      return result.points
+          .map((point) => LatLng(point.latitude, point.longitude))
+          .toList();
     } else {
-      print("no route found");
+      return [];
     }
   }
 
   void _addPolyLine() {
-    PolylineId id = PolylineId("poly");
-    Polyline polyline = Polyline(
-        polylineId: id,
+    setState(() {
+      _polylines.clear();
+      _polylines.add(Polyline(
+        polylineId: PolylineId("polyline"),
         color: Colors.red,
         width: 5,
-        points: polylineCoordinates);
-    _polylines.add(polyline);
-    setState(() {});
+        points: List.from(polylineCoordinates),
+      ));
+    });
+  }
+
+  void _updateWaypoints(
+      List<LatLng> newWaypoints, List<String> newTiles) async {
+    setState(() {
+      waypoints.clear();
+      waypointsTitles.clear();
+      waypoints.addAll(newWaypoints);
+      waypointsTitles.addAll(newTiles);
+      _polylines.clear();
+      polylineCoordinates.clear();
+    });
+
+    _updateMarker();
+    _getPolyline(waypoints);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Plan"),
-        titleTextStyle: const TextStyle(
-          color: AppColors.white,
-          fontSize: 14,
-          fontWeight: FontWeight.bold,
+        appBar: AppBar(
+          title: const Text("Plan"),
+          titleTextStyle: const TextStyle(
+            color: AppColors.white,
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+          ),
+          backgroundColor: AppColors.green,
         ),
-        backgroundColor: AppColors.green,
-      ),
-      body: Column(
-        children: [
-          TextField(
-            controller: _currentLocationController,
-            onSubmitted: (value) => _searchPlace(value, "currentLocation"),
-            textAlignVertical: TextAlignVertical.center,
-            decoration: InputDecoration(
-              prefixIcon: const Icon(
-                Icons.search,
-                color: Colors.grey,
-              ),
-              suffixIcon: IconButton(
-                icon: const Icon(Icons.my_location, color: Colors.green),
-                onPressed: _getCurrentLocation,
-                tooltip: "Get Current Location",
-              ),
-              hintText: "Current Location",
-              hintStyle: TextStyle(color: Colors.grey),
+        body: Stack(
+          children: [
+            Column(
+              children: [
+                TextField(
+                  controller: _currentLocationController,
+                  onSubmitted: (value) =>
+                      _searchPlace(value, "currentLocation"),
+                  textAlignVertical: TextAlignVertical.center,
+                  decoration: InputDecoration(
+                    prefixIcon: const Icon(
+                      Icons.search,
+                      color: Colors.grey,
+                    ),
+                    suffixIcon: IconButton(
+                      icon: const Icon(Icons.my_location, color: Colors.green),
+                      onPressed: _getCurrentLocation,
+                      tooltip: "Get Current Location",
+                    ),
+                    hintText: "Current Location",
+                    hintStyle: TextStyle(color: Colors.grey),
+                  ),
+                ),
+                TextField(
+                  controller: _midPointController,
+                  onSubmitted: (value) => _searchPlace(value, "midPoint"),
+                  textAlignVertical: TextAlignVertical.center,
+                  decoration: InputDecoration(
+                    prefixIcon: const Icon(
+                      Icons.search,
+                      color: Colors.grey,
+                    ),
+                    hintText: "Midpoint",
+                    hintStyle: TextStyle(color: Colors.grey),
+                  ),
+                ),
+                TextField(
+                  controller: _destinationController,
+                  onSubmitted: (value) => _searchPlace(value, "destination"),
+                  textAlignVertical: TextAlignVertical.center,
+                  decoration: InputDecoration(
+                    prefixIcon: const Icon(
+                      Icons.search,
+                      color: Colors.grey,
+                    ),
+                    hintText: "Destination",
+                    hintStyle: TextStyle(color: Colors.grey),
+                  ),
+                ),
+                const SizedBox(
+                  height: 5,
+                ),
+                Expanded(
+                  child: GoogleMap(
+                    onMapCreated: _onMapCreated,
+                    initialCameraPosition:
+                        CameraPosition(target: _center, zoom: 16.0),
+                    markers: _markers,
+                    polylines: _polylines,
+                  ),
+                ),
+              ],
             ),
-          ),
-          TextField(
-            controller: _destinationController,
-            onSubmitted: (value) => _searchPlace(value, "destination"),
-            textAlignVertical: TextAlignVertical.center,
-            decoration: InputDecoration(
-              prefixIcon: const Icon(
-                Icons.search,
-                color: Colors.grey,
-              ),
-              hintText: "Destination",
-              hintStyle: TextStyle(color: Colors.grey),
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: _selectedAttraction != null
+                  ? AttractionCard2(
+                      title: _selectedAttraction!["title"],
+                      description: _selectedAttraction!["description"],
+                      imageUrls:
+                          List<String>.from(_selectedAttraction!["imageUrls"]),
+                      distance: _selectedAttraction!["distance"],
+                      onAddWaypoint: () {
+                        _addWaypoint(_selectedAttraction);
+                        setState(() {
+                          _selectedAttraction = null;
+                        });
+                      },
+                    )
+                  : (waypoints.length >= 2
+                      ? PlanSaveCard(
+                          waypoints: waypoints,
+                          waypointsTitles: waypointsTitles,
+                          onReorderCompleted: (newWaypoints, newTitles) {
+                            _updateWaypoints(newWaypoints, newTitles);
+                          },
+                        )
+                      : Container()),
             ),
-          ),
-          const SizedBox(
-            height: 13,
-          ),
-          SizedBox(
-            height: 300,
-            child: GoogleMap(
-              onMapCreated: _onMapCreated,
-              initialCameraPosition:
-                  CameraPosition(target: _center, zoom: 11.0),
-              markers: _markers,
-              polylines: _polylines,
-            ),
-          ),
-          const SizedBox(
-            height: 16,
-          ),
-          Container(
-            height: 3,
-            margin: const EdgeInsets.symmetric(horizontal: 180),
-            decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(10)),
-          ),
-          const SizedBox(
-            height: 10,
-          ),
-          Text(
-            "${listData.length} sights",
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(
-            height: 10,
-          ),
-          Expanded(
-            child: ListView.builder(
-              itemCount: listData.length,
-              itemBuilder: (context, index) {
-                final attraction = listData[index];
-                return AttractionCard(
-                  title: attraction["title"],
-                  description: attraction["description"],
-                  imageUrls: List<String>.from(attraction["imageUrls"]),
-                  distance: attraction["distance"],
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-      bottomNavigationBar: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-          child:
-              Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-            YellowButton(
-              onPressed: () {},
-              iconUrl: 'lib/images/plan_save.svg',
-              label: "Save Plan",
-            ),
-            YellowButton(
-              onPressed: () {
-                Get.toNamed("./pay");
-              },
-              iconUrl: 'lib/images/Card.svg',
-              label: "Buy Tickets",
-            ),
-          ])),
-    );
+          ],
+        ));
   }
 }

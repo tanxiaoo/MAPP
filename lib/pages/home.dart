@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geocoding/geocoding.dart';
 import '../components/my_textfield.dart';
-import '../components/attraction_card.dart';
+import '../components/attraction_card1.dart';
 import '../data/listData.dart';
 import '../const.dart';
 
@@ -125,7 +125,7 @@ class _HomePageState extends State<HomePage> {
                 itemCount: listData.length,
                 itemBuilder: (context, index) {
                   final attraction = listData[index];
-                  return AttractionCard(
+                  return AttractionCard1(
                     title: attraction["title"],
                     description: attraction["description"],
                     imageUrls: List<String>.from(attraction["imageUrls"]),
