@@ -20,6 +20,7 @@ class AttractionCard2 extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const String defaultImageUrl = "https://via.placeholder.com/400x300.png?text=No+Image";
     return Container(
       color: Colors.white,
       padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 16),
@@ -37,9 +38,34 @@ class AttractionCard2 extends StatelessWidget {
           const SizedBox(
             height: 6,
           ),
+          
+
           SizedBox(
             height: 135,
-            child: ListView.builder(
+            child: imageUrls.isNotEmpty 
+            ? imageUrls.length == 1
+            ? Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(5),
+                      child: Image.network(
+                        imageUrls[0],
+                        height: 135,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return const Center(
+                              child: CircularProgressIndicator());
+                        },
+                        errorBuilder: (context, error, stackTrace) {
+                          return const Center(
+                              child: Icon(Icons.error, color: Colors.red));
+                        },
+                      ),
+                    ),
+                  )
+            : ListView.builder(
                 scrollDirection: Axis.horizontal,
                 itemCount: imageUrls.length,
                 itemBuilder: (context, index) {
@@ -64,7 +90,27 @@ class AttractionCard2 extends StatelessWidget {
                       ),
                     ),
                   );
-                }),
+                }): Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(5),
+                      child: Image.network(
+                        defaultImageUrl,
+                        height: 135,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return const Center(
+                              child: CircularProgressIndicator());
+                        },
+                        errorBuilder: (context, error, stackTrace) {
+                          return const Center(
+                              child: Icon(Icons.error, color: Colors.red));
+                        },
+                      ),
+                    ),
+                  )
           ),
           const SizedBox(
             height: 6,

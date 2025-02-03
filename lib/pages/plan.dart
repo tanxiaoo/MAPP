@@ -19,6 +19,7 @@ import 'dart:ui' as ui;
 import 'dart:typed_data';
 import '../components/customMarker.dart';
 import '../components/plan_save_card.dart';
+import '../components/keepAliveWrapper.dart';
 
 class PlanPage extends StatefulWidget {
   const PlanPage({super.key});
@@ -31,7 +32,6 @@ class _PlanPageState extends State<PlanPage> {
   late GoogleMapController mapController;
   final TextEditingController _currentLocationController =
       TextEditingController();
-  final TextEditingController _midPointController = TextEditingController();
   final TextEditingController _destinationController = TextEditingController();
   final LatLng _center = const LatLng(45.464211, 9.191383);
   final Set<Marker> _markers = {};
@@ -42,12 +42,13 @@ class _PlanPageState extends State<PlanPage> {
   PolylinePoints polylinePoints = PolylinePoints();
   final String googleAPiKey = dotenv.env['GOOGLE_API_KEY'] ?? '';
   LatLng? _currentLatLng;
-  LatLng? _midPointLatLng;
   LatLng? _destinationLatLng;
 
   Map<String, dynamic>? _selectedAttraction;
   final List<LatLng> waypoints = [];
   final List<String> waypointsTitles = [];
+
+  Map<String, dynamic> routeDetails = {};
 
   void _onMapCreated(GoogleMapController controller) async {
     mapController = controller;
@@ -102,14 +103,6 @@ class _PlanPageState extends State<PlanPage> {
       ));
     }
 
-    if (_midPointLatLng != null) {
-      updatedMarkers.add(Marker(
-        markerId: const MarkerId("midPoint"),
-        position: _midPointLatLng!,
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange),
-      ));
-    }
-
     if (_destinationLatLng != null) {
       updatedMarkers.add(Marker(
         markerId: const MarkerId("destination"),
@@ -134,23 +127,15 @@ class _PlanPageState extends State<PlanPage> {
 
         if (markerId == "currentLocation") {
           _currentLatLng = newPosition;
-        } else if (markerId == "midPoint") {
-          _midPointLatLng = newPosition;
         } else if (markerId == "destination") {
           _destinationLatLng = newPosition;
         }
 
         mapController.animateCamera(CameraUpdate.newLatLng(newPosition));
 
+        _selectedAttraction = await _getPlaceDetails(newPosition);
+        _selectedAttraction!["title"] = value;
         _updateMarker();
-
-        _addWaypoint({
-          "title": value,
-          "coordinates": {
-            "latitude": newPosition.latitude,
-            "longitude": newPosition.longitude
-          }
-        });
       } else {
         print("No locations found for: $value");
       }
@@ -179,48 +164,65 @@ class _PlanPageState extends State<PlanPage> {
       mapController
           .animateCamera(CameraUpdate.newLatLngZoom(currentPosition, 14));
 
-      // get the name of current location
-      String placeName = await _getPlaceNameFromLocation(
-          currentPosition.latitude, currentPosition.longitude);
-      setState(() {
-        _currentLocationController.text = placeName;
-      });
-
-      _addWaypoint({
-        "title": placeName.isNotEmpty ? placeName : "current location",
-        "coordinates": {
-          "latitude": currentPosition.latitude,
-          "longitude": currentPosition.longitude
-        }
-      });
+      // get the details of current location
+      _selectedAttraction = await _getPlaceDetails(currentPosition);
+      _currentLocationController.text = _selectedAttraction!["title"];
       _updateMarker();
     } catch (e) {
       print("Error fetching location: $e");
     }
   }
 
-  Future<String> _getPlaceNameFromLocation(
-      double latitude, double longitude) async {
+  Future<Map<String, dynamic>> _getPlaceDetails(LatLng position) async {
     try {
       final String url =
           "https://maps.googleapis.com/maps/api/place/nearbysearch/json"
-          "?location=$latitude,$longitude&rankby=distance&key=$googleAPiKey";
+          "?location=${position.latitude},${position.longitude}&rankby=distance&key=$googleAPiKey";
 
       final response = await http.get(Uri.parse(url));
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (data["results"].isNotEmpty) {
-          return data["results"][0]["name"] ?? "Unknown Place";
+          final place = data["results"][0];
+          String placeName = place["name"] ?? "Unknown Place";
+          String address = place.containsKey("vicinity")
+              ? place["vicinity"]
+              : "No address available.";
+          List<String> imageUrls = [];
+          if (place.containsKey("photos") && place["photos"] is List) {
+            final photos = place["photos"] as List;
+            for (var i = 0; i < min(5, photos.length); i++) {
+              String photoReference = photos[i]["photo_reference"];
+              String imageUrl =
+                  "https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photoreference=$photoReference&key=$googleAPiKey";
+              imageUrls.add(imageUrl);
+            }
+          }
+          Map<String, dynamic> coordinates = {
+            "latitude": position.latitude,
+            "longitude": position.longitude
+          };
+
+          return {
+            "title": placeName,
+            "description": address,
+            "imageUrls": imageUrls,
+            "distance": "Current location",
+            "coordinates": coordinates,
+          };
         }
-        return "No Place Found";
-      } else {
-        return "Error: ${response.statusCode}";
       }
     } catch (e) {
-      print("Error fetching place name: $e");
-      return "Unknown Place";
+      print("Error fetching place details: $e");
     }
+    return {
+      "title": "No Place Found",
+      "description": "No details available.",
+      "imageUrls": [],
+      "distance": "Current location",
+      "coordinates": {"latitude": 0.0, "longitude": 0.0}
+    };
   }
 
   void _addWaypoint(Map<String, dynamic>? attraction) async {
@@ -249,37 +251,89 @@ class _PlanPageState extends State<PlanPage> {
     if (waypoints.length < 2) return;
 
     List<LatLng> newPolylineCoordinates = [];
+    Map<String, dynamic> newRouteDetails = {};
 
     for (int i = 0; i < waypoints.length - 1; i++) {
-      List<LatLng> segment =
-          await _requestRoute(waypoints[i], waypoints[i + 1]);
-      newPolylineCoordinates.addAll(segment);
+      var routeData = await _requestRoute(waypoints[i], waypoints[i + 1]);
+      newPolylineCoordinates.addAll(routeData["polyline"]);
+      newRouteDetails["${i}_${i + 1}"] = routeData["details"];
     }
 
     setState(() {
       _polylines.clear();
       polylineCoordinates.clear();
       polylineCoordinates.addAll(newPolylineCoordinates);
+      routeDetails = newRouteDetails;
     });
 
     _addPolyLine();
   }
 
-  Future<List<LatLng>> _requestRoute(LatLng start, LatLng end) async {
-    PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
-      googleApiKey: googleAPiKey,
-      request: PolylineRequest(
-          origin: PointLatLng(start.latitude, start.longitude),
-          destination: PointLatLng(end.latitude, end.longitude),
-          mode: TravelMode.walking),
-    );
+  Future<Map<String, dynamic>> _requestRoute(LatLng start, LatLng end) async {
+    try {
+      final String url = "https://maps.googleapis.com/maps/api/directions/json?"
+          "origin=${start.latitude},${start.longitude}"
+          "&destination=${end.latitude},${end.longitude}"
+          "&mode=transit"
+          "&key=$googleAPiKey";
 
-    if (result.points.isNotEmpty) {
-      return result.points
-          .map((point) => LatLng(point.latitude, point.longitude))
-          .toList();
-    } else {
-      return [];
+      final response = await http.get(Uri.parse(url));
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data["routes"].isNotEmpty) {
+          List<LatLng> polylineCoordinates = [];
+          List<Map<String, String>> transportDetails = [];
+
+          for (var route in data["routes"]) {
+            for (var leg in route["legs"]) {
+              for (var step in leg["steps"]) {
+                print("Step Data: ${jsonEncode(step)}");
+                String travelMode = step["travel_mode"];
+
+                if (step.containsKey("polyline")) {
+                  List<PointLatLng> decodePolyline =
+                      polylinePoints.decodePolyline(step["polyline"]["points"]);
+                  polylineCoordinates.addAll(decodePolyline
+                      .map((point) => LatLng(point.latitude, point.longitude)));
+                }
+
+                if (travelMode == "TRANSIT" &&
+                    step.containsKey("transit_details")) {
+                  var transit = step["transit_details"];
+                  transportDetails.add({
+                    "mode": transit["line"]["vehicle"]["name"],
+                    "line": transit["line"]["short_name"],
+                    "departure": transit["departure_stop"]["name"],
+                    "arrival": transit["arrival_stop"]["name"],
+                    "duration": leg["duration"]["text"],
+                    "distance": step["distance"]["text"],
+                  });
+                } else if (travelMode == "WALKING") {
+                  transportDetails.add({
+                    "mode": "Walking",
+                    "line": "",
+                    "departure": step["start_location"].toString(),
+                    "arrival": step["end_location"].toString(),
+                    "duration": step["duration"]["text"],
+                    "distance": step["distance"]["text"],
+                  });
+                }
+              }
+            }
+          }
+          return {
+            "polyline": polylineCoordinates,
+            "details": transportDetails,
+          };
+        } else {
+          return {"polyline": [], "details": []};
+        }
+      } else {
+        return {"polyline": [], "details": []};
+      }
+    } catch (e) {
+      return {"polyline": [], "details": []};
     }
   }
 
@@ -312,108 +366,99 @@ class _PlanPageState extends State<PlanPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: const Text("Plan"),
-          titleTextStyle: const TextStyle(
-            color: AppColors.white,
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-          ),
-          backgroundColor: AppColors.green,
-        ),
-        body: Stack(
-          children: [
-            Column(
-              children: [
-                TextField(
-                  controller: _currentLocationController,
-                  onSubmitted: (value) =>
-                      _searchPlace(value, "currentLocation"),
-                  textAlignVertical: TextAlignVertical.center,
-                  decoration: InputDecoration(
-                    prefixIcon: const Icon(
-                      Icons.search,
-                      color: Colors.grey,
-                    ),
-                    suffixIcon: IconButton(
-                      icon: const Icon(Icons.my_location, color: Colors.green),
-                      onPressed: _getCurrentLocation,
-                      tooltip: "Get Current Location",
-                    ),
-                    hintText: "Current Location",
-                    hintStyle: TextStyle(color: Colors.grey),
-                  ),
-                ),
-                TextField(
-                  controller: _midPointController,
-                  onSubmitted: (value) => _searchPlace(value, "midPoint"),
-                  textAlignVertical: TextAlignVertical.center,
-                  decoration: InputDecoration(
-                    prefixIcon: const Icon(
-                      Icons.search,
-                      color: Colors.grey,
-                    ),
-                    hintText: "Midpoint",
-                    hintStyle: TextStyle(color: Colors.grey),
-                  ),
-                ),
-                TextField(
-                  controller: _destinationController,
-                  onSubmitted: (value) => _searchPlace(value, "destination"),
-                  textAlignVertical: TextAlignVertical.center,
-                  decoration: InputDecoration(
-                    prefixIcon: const Icon(
-                      Icons.search,
-                      color: Colors.grey,
-                    ),
-                    hintText: "Destination",
-                    hintStyle: TextStyle(color: Colors.grey),
-                  ),
-                ),
-                const SizedBox(
-                  height: 5,
-                ),
-                Expanded(
-                  child: GoogleMap(
-                    onMapCreated: _onMapCreated,
-                    initialCameraPosition:
-                        CameraPosition(target: _center, zoom: 16.0),
-                    markers: _markers,
-                    polylines: _polylines,
-                  ),
-                ),
-              ],
+    return KeepAliveWrapper(
+        child: Scaffold(
+            appBar: AppBar(
+              title: const Text("Plan"),
+              titleTextStyle: const TextStyle(
+                color: AppColors.white,
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+              ),
+              backgroundColor: AppColors.green,
             ),
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: _selectedAttraction != null
-                  ? AttractionCard2(
-                      title: _selectedAttraction!["title"],
-                      description: _selectedAttraction!["description"],
-                      imageUrls:
-                          List<String>.from(_selectedAttraction!["imageUrls"]),
-                      distance: _selectedAttraction!["distance"],
-                      onAddWaypoint: () {
-                        _addWaypoint(_selectedAttraction);
-                        setState(() {
-                          _selectedAttraction = null;
-                        });
-                      },
-                    )
-                  : (waypoints.length >= 2
-                      ? PlanSaveCard(
-                          waypoints: waypoints,
-                          waypointsTitles: waypointsTitles,
-                          onReorderCompleted: (newWaypoints, newTitles) {
-                            _updateWaypoints(newWaypoints, newTitles);
+            body: Stack(
+              children: [
+                Column(
+                  children: [
+                    TextField(
+                      controller: _currentLocationController,
+                      onSubmitted: (value) =>
+                          _searchPlace(value, "currentLocation"),
+                      textAlignVertical: TextAlignVertical.center,
+                      decoration: InputDecoration(
+                        prefixIcon: const Icon(
+                          Icons.search,
+                          color: Colors.grey,
+                        ),
+                        suffixIcon: IconButton(
+                          icon: const Icon(Icons.my_location,
+                              color: Colors.green),
+                          onPressed: _getCurrentLocation,
+                          tooltip: "Get Current Location",
+                        ),
+                        hintText: "Current Location",
+                        hintStyle: TextStyle(color: Colors.grey),
+                      ),
+                    ),
+                    TextField(
+                      controller: _destinationController,
+                      onSubmitted: (value) =>
+                          _searchPlace(value, "destination"),
+                      textAlignVertical: TextAlignVertical.center,
+                      decoration: InputDecoration(
+                        prefixIcon: const Icon(
+                          Icons.search,
+                          color: Colors.grey,
+                        ),
+                        hintText: "Where do you want to visit",
+                        hintStyle: TextStyle(color: Colors.grey),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 5,
+                    ),
+                    Expanded(
+                      child: GoogleMap(
+                        onMapCreated: _onMapCreated,
+                        initialCameraPosition:
+                            CameraPosition(target: _center, zoom: 16.0),
+                        markers: _markers,
+                        polylines: _polylines,
+                      ),
+                    ),
+                  ],
+                ),
+                Positioned(
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  child: _selectedAttraction != null
+                      ? AttractionCard2(
+                          title: _selectedAttraction!["title"],
+                          description: _selectedAttraction!["description"],
+                          imageUrls: List<String>.from(
+                              _selectedAttraction!["imageUrls"]),
+                          distance: _selectedAttraction!["distance"],
+                          onAddWaypoint: () {
+                            _addWaypoint(_selectedAttraction);
+                            setState(() {
+                              _selectedAttraction = null;
+                            });
                           },
                         )
-                      : Container()),
-            ),
-          ],
-        ));
+                      : (waypoints.length >= 2
+                          ? PlanSaveCard(
+                              waypoints: waypoints,
+                              waypointsTitles: waypointsTitles,
+                              routeDetails: routeDetails,
+                              onReorderCompleted: (newWaypoints, newTitles) {
+                                _updateWaypoints(newWaypoints, newTitles);
+                              },
+                            )
+                          : Container()),
+                ),
+              ],
+            )));
   }
 }

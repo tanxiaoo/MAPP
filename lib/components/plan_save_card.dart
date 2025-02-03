@@ -2,16 +2,19 @@ import 'package:flutter/material.dart';
 import '../components/yellow_button.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import '../pages/link_route.dart';
 
 class PlanSaveCard extends StatelessWidget {
   final List<LatLng> waypoints;
   final List<String> waypointsTitles;
+  final Map<String, dynamic> routeDetails;
   final Function(List<LatLng>, List<String>) onReorderCompleted;
   const PlanSaveCard(
       {super.key,
       required this.waypoints,
       required this.onReorderCompleted,
-      required this.waypointsTitles});
+      required this.waypointsTitles,
+      required this.routeDetails});
 
   void _showRouteList(BuildContext context) {
     List<LatLng> mutableWaypoints = List.from(waypoints);
@@ -93,10 +96,13 @@ class PlanSaveCard extends StatelessWidget {
           Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
             YellowButton(
               onPressed: () {
-                Get.toNamed("/list");
+                Get.toNamed("/link_route", arguments: {
+                      "waypointsTitles": waypointsTitles,
+                      "routeDetails": routeDetails, 
+                    },);
               },
               iconUrl: 'lib/images/plan_save.svg',
-              label: "Save Plan",
+              label: "Link Route",
             ),
             YellowButton(
               onPressed: () {

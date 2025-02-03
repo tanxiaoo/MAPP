@@ -10,6 +10,7 @@ import '../pages/pay.dart';
 import '../pages/login.dart';
 import '../pages/auth_page.dart';
 import '../pages/register.dart';
+import '../pages/link_route.dart';
 
 class AppPage {
   static final routers = [
@@ -23,5 +24,12 @@ class AppPage {
     GetPage(name: "/login", page: () => const LoginPage()),
     GetPage(name: "/auth_page", page: () => const AuthPage()),
     GetPage(name: "/register", page: () => const RegisterPage()),
+    GetPage(name: "/link_route", page: () {
+      final arguments = Get.arguments ?? {};
+      return LinkRoutePage(
+        waypointsTitles: List<String>.from(arguments["waypointsTitles"] ?? []),
+        routeDetails: arguments["routeDetails"] ?? {},
+      );
+    }),
   ];
 }
