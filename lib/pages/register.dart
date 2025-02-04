@@ -120,16 +120,148 @@ class _RegisterPageState extends State<RegisterPage> {
     double screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
         backgroundColor: AppColors.lightGreen,
-        body: SingleChildScrollView(
-          child: SafeArea(
-              child: Center(
-            child: Column(
+        body: LayoutBuilder(
+  builder: (context, constraints) {
+    bool isTablet = constraints.maxWidth > 800; 
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+      child: isTablet
+          ? Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        width: 150,
+                        height: 120,
+                        child: Image.asset(
+                          "lib/images/logo.png",
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text(
+                        "Trenord - Travel",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      const Text(
+                        "Life is Elsewhere",
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey,
+                        ),
+                      ),
+                      const SizedBox(height: 30),
+                      MyTextField(
+                        controller: emailController,
+                        hintText: "Email",
+                        obscureText: false,
+                      ),
+                      const SizedBox(height: 13),
+                      MyTextField(
+                        controller: passwordController,
+                        hintText: "Password",
+                        obscureText: true,
+                      ),
+                      const SizedBox(height: 13),
+                      MyTextField(
+                        controller: confirmPasswordController,
+                        hintText: "Confirm Password",
+                        obscureText: true,
+                      ),
+                      const SizedBox(height: 15),
+                      YellowButton(
+                        width: constraints.maxWidth * 0.3,
+                        onPressed: signUserIn,
+                        iconUrl: 'lib/images/Login.svg',
+                        label: "Register Now",
+                      ),
+                      const SizedBox(height: 15),
+                      const Row(
+                        children: [
+                          Expanded(
+                            child: Divider(
+                              thickness: 0.5,
+                              color: Colors.grey,
+                            ),
+                          ),
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 10),
+                            child: Text(
+                              "Or continue with",
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: Divider(
+                              thickness: 0.5,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 15),
+                      SizedBox(
+                        height: 40,
+                        child: GestureDetector(
+                          onTap: signInWithGoogle,
+                          child: Image.asset(
+                            "lib/images/google.png",
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 15),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text(
+                            "Already have an account?",
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          GestureDetector(
+                            onTap: () {
+                              Get.toNamed("/login");
+                            },
+                            child: Text(
+                              "Log In",
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.yellow,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            )
+          : Column( 
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const SizedBox(
-                  height: 180,
-                ),
-                // logo
+                const SizedBox(height: 180),
                 SizedBox(
                   width: 100,
                   height: 85,
@@ -138,10 +270,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     fit: BoxFit.cover,
                   ),
                 ),
-                const SizedBox(
-                  height: 35,
-                ),
-                //Trenord - Travel
+                const SizedBox(height: 35),
                 const Text(
                   "Trenord - Travel",
                   style: TextStyle(
@@ -149,10 +278,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(
-                  height: 15,
-                ),
-                //life is elsewhere
+                const SizedBox(height: 15),
                 const Text(
                   "Life is Elsewhere",
                   style: TextStyle(
@@ -160,50 +286,40 @@ class _RegisterPageState extends State<RegisterPage> {
                     color: Colors.grey,
                   ),
                 ),
-                const SizedBox(
-                  height: 100,
-                ),
-                //username textfield
+                const SizedBox(height: 100),
                 MyTextField(
-                    controller: emailController,
-                    hintText: "Email",
-                    obscureText: false),
-                const SizedBox(
-                  height: 13,
+                  controller: emailController,
+                  hintText: "Email",
+                  obscureText: false,
                 ),
-                //password textfield
+                const SizedBox(height: 13),
                 MyTextField(
-                    controller: passwordController,
-                    hintText: "Password",
-                    obscureText: true),
-                const SizedBox(
-                  height: 13,
+                  controller: passwordController,
+                  hintText: "Password",
+                  obscureText: true,
                 ),
+                const SizedBox(height: 13),
                 MyTextField(
-                    controller: confirmPasswordController,
-                    hintText: "Confirm Password",
-                    obscureText: true),
-                const SizedBox(
-                  height: 15,
+                  controller: confirmPasswordController,
+                  hintText: "Confirm Password",
+                  obscureText: true,
                 ),
-                //login button
+                const SizedBox(height: 15),
                 YellowButton(
-                  width: screenWidth - 50,
+                  width: MediaQuery.of(context).size.width - 50,
                   onPressed: signUserIn,
                   iconUrl: 'lib/images/Login.svg',
                   label: "Register Now",
                 ),
-                const SizedBox(
-                  height: 15,
-                ),
-                //or continue with
+                const SizedBox(height: 15),
                 const Row(
                   children: [
                     Expanded(
-                        child: Divider(
-                      thickness: 0.5,
-                      color: Colors.grey,
-                    )),
+                      child: Divider(
+                        thickness: 0.5,
+                        color: Colors.grey,
+                      ),
+                    ),
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: 10),
                       child: Text(
@@ -215,16 +331,14 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                     ),
                     Expanded(
-                        child: Divider(
-                      thickness: 0.5,
-                      color: Colors.grey,
-                    )),
+                      child: Divider(
+                        thickness: 0.5,
+                        color: Colors.grey,
+                      ),
+                    ),
                   ],
                 ),
-                const SizedBox(
-                  height: 15,
-                ),
-                //google sign in buttons
+                const SizedBox(height: 15),
                 SizedBox(
                   height: 40,
                   child: GestureDetector(
@@ -235,10 +349,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
                   ),
                 ),
-                const SizedBox(
-                  height: 15,
-                ),
-                //Don't have any account? Register now
+                const SizedBox(height: 15),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -249,9 +360,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         color: Colors.grey,
                       ),
                     ),
-                    const SizedBox(
-                      width: 4,
-                    ),
+                    const SizedBox(width: 4),
                     GestureDetector(
                       onTap: () {
                         Get.toNamed("/login");
@@ -264,12 +373,15 @@ class _RegisterPageState extends State<RegisterPage> {
                           color: AppColors.yellow,
                         ),
                       ),
-                    )
+                    ),
                   ],
-                )
+                ),
               ],
             ),
-          )),
-        ));
+    );
+  },
+),
+
+    );
   }
 }

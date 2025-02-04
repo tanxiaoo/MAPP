@@ -50,6 +50,21 @@ class _PlanPageState extends State<PlanPage> {
 
   Map<String, dynamic> routeDetails = {};
 
+  @override
+  void initState() {
+    super.initState();
+    
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final args = ModalRoute.of(context)?.settings.arguments;
+      if (args != null && args is Map<String, dynamic>) {
+        setState(() {
+          _selectedAttraction = args;
+        });
+      }
+    });
+  }
+
+
   void _onMapCreated(GoogleMapController controller) async {
     mapController = controller;
     _updateMarker();
@@ -162,7 +177,7 @@ class _PlanPageState extends State<PlanPage> {
           LatLng(locationData.latitude!, locationData.longitude!);
       _currentLatLng = currentPosition;
       mapController
-          .animateCamera(CameraUpdate.newLatLngZoom(currentPosition, 14));
+          .animateCamera(CameraUpdate.newLatLngZoom(currentPosition, 7));
 
       // get the details of current location
       _selectedAttraction = await _getPlaceDetails(currentPosition);
@@ -377,62 +392,18 @@ class _PlanPageState extends State<PlanPage> {
               ),
               backgroundColor: AppColors.green,
             ),
-            body: Stack(
+            body: LayoutBuilder(
+  builder: (context, constraints) {
+    bool isTablet = constraints.maxWidth > 800; 
+
+    if (isTablet) {
+      return Row(
+        children: [
+          Expanded(
+            flex: 1, 
+            child: Column(
               children: [
-                Column(
-                  children: [
-                    TextField(
-                      controller: _currentLocationController,
-                      onSubmitted: (value) =>
-                          _searchPlace(value, "currentLocation"),
-                      textAlignVertical: TextAlignVertical.center,
-                      decoration: InputDecoration(
-                        prefixIcon: const Icon(
-                          Icons.search,
-                          color: Colors.grey,
-                        ),
-                        suffixIcon: IconButton(
-                          icon: const Icon(Icons.my_location,
-                              color: Colors.green),
-                          onPressed: _getCurrentLocation,
-                          tooltip: "Get Current Location",
-                        ),
-                        hintText: "Current Location",
-                        hintStyle: TextStyle(color: Colors.grey),
-                      ),
-                    ),
-                    TextField(
-                      controller: _destinationController,
-                      onSubmitted: (value) =>
-                          _searchPlace(value, "destination"),
-                      textAlignVertical: TextAlignVertical.center,
-                      decoration: InputDecoration(
-                        prefixIcon: const Icon(
-                          Icons.search,
-                          color: Colors.grey,
-                        ),
-                        hintText: "Where do you want to visit",
-                        hintStyle: TextStyle(color: Colors.grey),
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 5,
-                    ),
-                    Expanded(
-                      child: GoogleMap(
-                        onMapCreated: _onMapCreated,
-                        initialCameraPosition:
-                            CameraPosition(target: _center, zoom: 16.0),
-                        markers: _markers,
-                        polylines: _polylines,
-                      ),
-                    ),
-                  ],
-                ),
-                Positioned(
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
+                Expanded(
                   child: _selectedAttraction != null
                       ? AttractionCard2(
                           title: _selectedAttraction!["title"],
@@ -445,6 +416,9 @@ class _PlanPageState extends State<PlanPage> {
                             setState(() {
                               _selectedAttraction = null;
                             });
+                          },
+                          onDetailsPressed: () {
+                            Get.toNamed("/detail", arguments: _selectedAttraction);
                           },
                         )
                       : (waypoints.length >= 2
@@ -459,6 +433,130 @@ class _PlanPageState extends State<PlanPage> {
                           : Container()),
                 ),
               ],
-            )));
+            ),
+          ),
+
+          Expanded(
+            flex: 1, 
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 5),
+                  child: Column(
+                    children: [
+                      TextField(
+                        controller: _currentLocationController,
+                        onSubmitted: (value) => _searchPlace(value, "currentLocation"),
+                        decoration: InputDecoration(
+                          prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                          suffixIcon: IconButton(
+                            icon: const Icon(Icons.my_location, color: Colors.green),
+                            onPressed: _getCurrentLocation,
+                          ),
+                          hintText: "Current Location",
+                        ),
+                      ),
+                      const SizedBox(height: 5),
+                      TextField(
+                        controller: _destinationController,
+                        onSubmitted: (value) => _searchPlace(value, "destination"),
+                        decoration: InputDecoration(
+                          prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                          hintText: "Where do you want to visit",
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 5),
+
+                Expanded(
+                  child: GoogleMap(
+                    onMapCreated: _onMapCreated,
+                    initialCameraPosition: CameraPosition(target: _center, zoom: 7.0),
+                    markers: _markers,
+                    polylines: _polylines,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      );
+    } else {
+      return Stack(
+        children: [
+          Column(
+            children: [
+              TextField(
+                controller: _currentLocationController,
+                onSubmitted: (value) => _searchPlace(value, "currentLocation"),
+                decoration: InputDecoration(
+                  prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.my_location, color: Colors.green),
+                    onPressed: _getCurrentLocation,
+                  ),
+                  hintText: "Current Location",
+                ),
+              ),
+              TextField(
+                controller: _destinationController,
+                onSubmitted: (value) => _searchPlace(value, "destination"),
+                decoration: InputDecoration(
+                  prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                  hintText: "Where do you want to visit",
+                ),
+              ),
+              const SizedBox(height: 5),
+              Expanded(
+                child: GoogleMap(
+                  onMapCreated: _onMapCreated,
+                  initialCameraPosition: CameraPosition(target: _center, zoom: 7.0),
+                  markers: _markers,
+                  polylines: _polylines,
+                ),
+              ),
+            ],
+          ),
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: _selectedAttraction != null
+                ? AttractionCard2(
+                    title: _selectedAttraction!["title"],
+                    description: _selectedAttraction!["description"],
+                    imageUrls: List<String>.from(_selectedAttraction!["imageUrls"]),
+                    distance: _selectedAttraction!["distance"],
+                    onAddWaypoint: () {
+                      _addWaypoint(_selectedAttraction);
+                      setState(() {
+                        _selectedAttraction = null;
+                      });
+                    },
+                    onDetailsPressed: () {
+                      Get.toNamed("/detail", arguments: _selectedAttraction);
+                    },
+                  )
+                : (waypoints.length >= 2
+                    ? PlanSaveCard(
+                        waypoints: waypoints,
+                        waypointsTitles: waypointsTitles,
+                        routeDetails: routeDetails,
+                        onReorderCompleted: (newWaypoints, newTitles) {
+                          _updateWaypoints(newWaypoints, newTitles);
+                        },
+                      )
+                    : Container()),
+          ),
+        ],
+      );
+    }
+  },
+),
+
+            
+      ));
   }
 }

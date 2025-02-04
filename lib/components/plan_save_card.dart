@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../components/yellow_button.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import '../pages/link_route.dart';
 
 class PlanSaveCard extends StatelessWidget {
   final List<LatLng> waypoints;
@@ -56,9 +55,24 @@ class PlanSaveCard extends StatelessWidget {
                             mutableTitles[index],
                             style: const TextStyle(fontSize: 16),
                           ),
-                          trailing: const Icon(
-                            Icons.drag_handle,
-                            color: Colors.grey,
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.delete,
+                                    color: Colors.grey),
+                                onPressed: () {
+                                  setState(() {
+                                    mutableWaypoints.removeAt(index);
+                                    mutableTitles.removeAt(index);
+                                  });
+                                },
+                              ),
+                              const Icon(
+                                Icons.drag_handle,
+                                color: Colors.grey,
+                              ),
+                            ],
                           ),
                         );
                       })))
@@ -88,28 +102,30 @@ class PlanSaveCard extends StatelessWidget {
         child: Column(children: [
           GestureDetector(
             onTap: () {
-              _showRouteList(context);
             },
-            child: const Text("adjust route"),
+            child: const Text("Here you can choose to link or adjust you routes"),
           ),
           const SizedBox(height: 12),
           Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
             YellowButton(
               onPressed: () {
-                Get.toNamed("/link_route", arguments: {
-                      "waypointsTitles": waypointsTitles,
-                      "routeDetails": routeDetails, 
-                    },);
+                Get.toNamed(
+                  "/link_route",
+                  arguments: {
+                    "waypointsTitles": waypointsTitles,
+                    "routeDetails": routeDetails,
+                  },
+                );
               },
-              iconUrl: 'lib/images/plan_save.svg',
+              iconUrl: 'lib/images/visit.svg',
               label: "Link Route",
             ),
             YellowButton(
               onPressed: () {
-                Get.toNamed("/list");
+                _showRouteList(context);
               },
-              iconUrl: 'lib/images/Card.svg',
-              label: "Buy Tickets",
+              iconUrl: 'lib/images/routes.svg',
+              label: "Adjust Route",
             ),
           ]),
           const SizedBox(height: 12),
