@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../components/yellow_button.dart';
 import '../const.dart';
-import 'package:intl/intl.dart';
-import '../components/api_service.dart';
-import '../components/ticket_card.dart';
 import '../components/firestore_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -48,31 +44,6 @@ class _LinkRoutePageState extends State<LinkRoutePage> {
     setState(() {
       expandedState[index] = !(expandedState[index] ?? false);
     });
-  }
-
-  void _pickDate() async {
-    DateTime? picked = await showDatePicker(
-        context: context,
-        firstDate: DateTime.now(),
-        lastDate: DateTime.now().add(const Duration(days: 365)));
-    if (picked != null) {
-      setState(() {
-        selectedDate = picked;
-      });
-    }
-  }
-
-  Future<void> _selectedDateRange() async {
-    DateTimeRange? picked = await showDateRangePicker(
-        context: context,
-        firstDate: DateTime.now(),
-        lastDate: DateTime.now().add(const Duration(days: 365)));
-
-    if (picked != null && picked != selectedDateRange) {
-      setState(() {
-        selectedDateRange = picked;
-      });
-    }
   }
 
   List<Map<String, String>> getTrainRoutes() {

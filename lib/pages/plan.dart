@@ -1,10 +1,8 @@
 import 'dart:convert';
 import 'dart:math';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../components/yellow_button.dart';
 import '../const.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geocoding/geocoding.dart' as geocoding;
@@ -12,11 +10,7 @@ import '../components/attraction_card2.dart';
 import '../data/listData.dart';
 import 'package:location/location.dart' as location;
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
-import 'package:google_places_flutter/google_places_flutter.dart';
-import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'dart:ui' as ui;
-import 'dart:typed_data';
 import '../components/customMarker.dart';
 import '../components/plan_save_card.dart';
 import '../components/keepAliveWrapper.dart';
