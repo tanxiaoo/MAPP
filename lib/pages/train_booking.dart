@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 import 'package:intl/intl.dart';
 import '../components/api_service.dart';
 import '../components/ticket_card.dart';
@@ -65,6 +64,7 @@ class _TrainBookingPageState extends State<TrainBookingPage> {
             "routeKey": routeKey 
           });
         }
+      // ignore: empty_catches
       } catch (e) {
       }
     }

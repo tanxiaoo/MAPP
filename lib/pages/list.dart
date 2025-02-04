@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
-import '../components/yellow_button.dart';
 import '../components/firestore_service.dart';
 import '../const.dart';
 
@@ -292,8 +290,8 @@ Widget _buildDetailRow(String label, String? value) {
       ),
       body: LayoutBuilder(
   builder: (context, constraints) {
-    bool isTablet = constraints.maxWidth > 800; // **判断是否是平板**
-    double itemWidth = isTablet ? constraints.maxWidth / 2 - 24 : constraints.maxWidth; // **平板 50%，手机 100%**
+    bool isTablet = constraints.maxWidth > 800; 
+    double itemWidth = isTablet ? constraints.maxWidth / 2 - 24 : constraints.maxWidth;
 
     return FutureBuilder<List<Map<String, dynamic>>>(
       future: firestoreService.fetchSavedPlans(userId),
@@ -310,18 +308,18 @@ Widget _buildDetailRow(String label, String? value) {
           child: SingleChildScrollView(
             child: isTablet
                 ? Wrap(
-                    spacing: 16, // **左右间距**
-                    runSpacing: 10, // **上下间距**
+                    spacing: 16, 
+                    runSpacing: 10, 
                     children: List.generate(snapshot.data!.length, (index) {
                       final plan = snapshot.data![index];
 
                       return SizedBox(
-                        width: itemWidth, // **左右交替排列**
+                        width: itemWidth,
                         child: _buildPlanCard(plan),
                       );
                     }),
                   )
-                : Column( // **手机端保持竖排**
+                : Column( 
                     children: snapshot.data!.map((plan) => _buildPlanCard(plan)).toList(),
                   ),
           ),

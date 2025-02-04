@@ -5,11 +5,8 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geocoding/geocoding.dart' as geocoding;
 import 'package:location/location.dart' as location;
 import 'package:http/http.dart' as http;
-import 'dart:math';
-
 import '../components/attraction_card1.dart';
 import '../data/listData.dart';
-import '../const.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../components/customMarker.dart';
 
@@ -114,13 +111,11 @@ class _HomePageState extends State<HomePage> {
     try {
       if (!await _location.serviceEnabled() &&
           !await _location.requestService()) {
-        print("Location services are disabled.");
         return;
       }
       if (await _location.hasPermission() == location.PermissionStatus.denied &&
           await _location.requestPermission() !=
               location.PermissionStatus.granted) {
-        print("Location permissions are denied.");
         return;
       }
       final locationData = await _location.getLocation();

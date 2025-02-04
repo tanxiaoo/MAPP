@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../const.dart';
-
 class DetailPage extends StatefulWidget {
   final Map<String, dynamic> attraction;
 
@@ -55,7 +53,6 @@ class _DetailPageState extends State<DetailPage> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // **大图**
           if (imageUrls.isNotEmpty)
             Image.network(
               imageUrls[0],
