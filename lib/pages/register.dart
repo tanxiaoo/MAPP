@@ -116,8 +116,6 @@ class _RegisterPageState extends State<RegisterPage> {
 
   @override
   Widget build(BuildContext context) {
-    //local variables
-    double screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
         backgroundColor: AppColors.lightGreen,
         body: LayoutBuilder(
