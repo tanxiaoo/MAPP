@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ApiService {
   static const String _baseUrl = "https://cloud.mp.trenord.it";
-  static const String _apiKey = "Y8X4IMtQBhmFIQYvOBmrr6TWZYN4jooE";
-
+  static final String _apiKey = dotenv.env['TRENORD_API_KEY'] ?? '';
   static Future<List<Map<String, dynamic>>> getTrainRoutes({
     required String origin,
     required String destination,

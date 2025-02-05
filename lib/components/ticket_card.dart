@@ -49,7 +49,7 @@ class TicketCard extends StatelessWidget {
                       style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
                     ),
                     Text(
-                      "$price €",
+                      price,
                       style: const TextStyle(fontSize: 12, color: Colors.red, fontWeight: FontWeight.bold),
                     ),
                   ],
