@@ -154,270 +154,273 @@ class _LoginPageState extends State<LoginPage> {
         builder: (context, constraints) {
           bool isTablet = constraints.maxWidth > 800;
 
-          return Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-            child: isTablet
-                ? Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            SizedBox(
-                              width: 150,
-                              height: 120,
-                              child: Image.asset(
-                                "lib/images/logo.png",
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Expanded(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Text(
-                              "Trenord - Travel",
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 10),
-                            const Text(
-                              "Life is Elsewhere",
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey,
-                              ),
-                            ),
-                            const SizedBox(height: 30),
-                            MyTextField(
-                              controller: emailController,
-                              hintText: "Email",
-                              obscureText: false,
-                            ),
-                            const SizedBox(height: 13),
-                            MyTextField(
-                              controller: passwordController,
-                              hintText: "Password",
-                              obscureText: true,
-                            ),
-                            const SizedBox(height: 15),
-                            GestureDetector(
-                              onTap: resetPassword,
-                              child: const Text(
-                                "Forget Password?",
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 15),
-                            YellowButton(
-                              width: constraints.maxWidth * 0.3,
-                              onPressed: signUserIn,
-                              iconUrl: 'lib/images/Login.svg',
-                              label: "Log In",
-                            ),
-                            const SizedBox(height: 15),
-                            const Row(
-                              children: [
-                                Expanded(
-                                  child: Divider(
-                                    thickness: 0.5,
-                                    color: Colors.grey,
-                                  ),
-                                ),
-                                Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: 10),
-                                  child: Text(
-                                    "Or continue with",
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.grey,
-                                    ),
-                                  ),
-                                ),
-                                Expanded(
-                                  child: Divider(
-                                    thickness: 0.5,
-                                    color: Colors.grey,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 15),
-                            SizedBox(
-                              height: 40,
-                              child: GestureDetector(
-                                onTap: signInWithGoogle,
+          return SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+              child: isTablet
+                  ? Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              SizedBox(
+                                width: 150,
+                                height: 120,
                                 child: Image.asset(
-                                  "lib/images/google.png",
+                                  "lib/images/logo.png",
                                   fit: BoxFit.cover,
                                 ),
                               ),
-                            ),
-                            const SizedBox(height: 15),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Text(
-                                  "Don't have any account?",
+                            ],
+                          ),
+                        ),
+                        Expanded(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Text(
+                                "Trenord - Travel",
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              const Text(
+                                "Life is Elsewhere",
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                              const SizedBox(height: 30),
+                              MyTextField(
+                                controller: emailController,
+                                hintText: "Email",
+                                obscureText: false,
+                              ),
+                              const SizedBox(height: 13),
+                              MyTextField(
+                                controller: passwordController,
+                                hintText: "Password",
+                                obscureText: true,
+                              ),
+                              const SizedBox(height: 15),
+                              GestureDetector(
+                                onTap: resetPassword,
+                                child: const Text(
+                                  "Forget Password?",
                                   style: TextStyle(
                                     fontSize: 12,
                                     color: Colors.grey,
                                   ),
                                 ),
-                                const SizedBox(width: 4),
-                                GestureDetector(
-                                  onTap: () {
-                                    Get.toNamed("/register");
-                                  },
-                                  child: Text(
-                                    "Register now",
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
-                                      color: AppColors.yellow,
+                              ),
+                              const SizedBox(height: 15),
+                              YellowButton(
+                                width: constraints.maxWidth * 0.3,
+                                onPressed: signUserIn,
+                                iconUrl: 'lib/images/Login.svg',
+                                label: "Log In",
+                              ),
+                              const SizedBox(height: 15),
+                              const Row(
+                                children: [
+                                  Expanded(
+                                    child: Divider(
+                                      thickness: 0.5,
+                                      color: Colors.grey,
                                     ),
                                   ),
+                                  Padding(
+                                    padding:
+                                        EdgeInsets.symmetric(horizontal: 10),
+                                    child: Text(
+                                      "Or continue with",
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: Divider(
+                                      thickness: 0.5,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 15),
+                              SizedBox(
+                                height: 40,
+                                child: GestureDetector(
+                                  onTap: signInWithGoogle,
+                                  child: Image.asset(
+                                    "lib/images/google.png",
+                                    fit: BoxFit.cover,
+                                  ),
                                 ),
-                              ],
-                            ),
-                          ],
+                              ),
+                              const SizedBox(height: 15),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Text(
+                                    "Don't have any account?",
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  GestureDetector(
+                                    onTap: () {
+                                      Get.toNamed("/register");
+                                    },
+                                    child: Text(
+                                      "Register now",
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                        color: AppColors.yellow,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
-                  )
-                : Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const SizedBox(height: 180),
-                      SizedBox(
-                        width: 100,
-                        height: 85,
-                        child: Image.asset(
-                          "lib/images/logo.png",
-                          fit: BoxFit.cover,
+                      ],
+                    )
+                  : Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const SizedBox(height: 180),
+                        SizedBox(
+                          width: 100,
+                          height: 85,
+                          child: Image.asset(
+                            "lib/images/logo.png",
+                            fit: BoxFit.cover,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 35),
-                      const Text(
-                        "Trenord - Travel",
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
+                        const SizedBox(height: 35),
+                        const Text(
+                          "Trenord - Travel",
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 15),
-                      const Text(
-                        "Life is Elsewhere",
-                        style: TextStyle(
-                          fontSize: 10,
-                          color: Colors.grey,
-                        ),
-                      ),
-                      const SizedBox(height: 120),
-                      MyTextField(
-                        controller: emailController,
-                        hintText: "Email",
-                        obscureText: false,
-                      ),
-                      const SizedBox(height: 13),
-                      MyTextField(
-                        controller: passwordController,
-                        hintText: "Password",
-                        obscureText: true,
-                      ),
-                      const SizedBox(height: 15),
-                      GestureDetector(
-                        onTap: resetPassword,
-                        child: const Text(
-                          "Forget Password?",
+                        const SizedBox(height: 15),
+                        const Text(
+                          "Life is Elsewhere",
                           style: TextStyle(
                             fontSize: 10,
                             color: Colors.grey,
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 15),
-                      YellowButton(
-                        width: MediaQuery.of(context).size.width - 50,
-                        onPressed: signUserIn,
-                        iconUrl: 'lib/images/Login.svg',
-                        label: "Log In",
-                      ),
-                      const SizedBox(height: 15),
-                      const Row(
-                        children: [
-                          Expanded(
-                            child: Divider(
-                              thickness: 0.5,
-                              color: Colors.grey,
-                            ),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 10),
-                            child: Text(
-                              "Or continue with",
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: Colors.grey,
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            child: Divider(
-                              thickness: 0.5,
-                              color: Colors.grey,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 15),
-                      SizedBox(
-                        height: 40,
-                        child: GestureDetector(
-                          onTap: signInWithGoogle,
-                          child: Image.asset(
-                            "lib/images/google.png",
-                            fit: BoxFit.cover,
-                          ),
+                        const SizedBox(height: 120),
+                        MyTextField(
+                          controller: emailController,
+                          hintText: "Email",
+                          obscureText: false,
                         ),
-                      ),
-                      const SizedBox(height: 15),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Text(
-                            "Don't have any account?",
+                        const SizedBox(height: 13),
+                        MyTextField(
+                          controller: passwordController,
+                          hintText: "Password",
+                          obscureText: true,
+                        ),
+                        const SizedBox(height: 15),
+                        GestureDetector(
+                          onTap: resetPassword,
+                          child: const Text(
+                            "Forget Password?",
                             style: TextStyle(
                               fontSize: 10,
                               color: Colors.grey,
                             ),
                           ),
-                          const SizedBox(width: 4),
-                          GestureDetector(
-                            onTap: () {
-                              Get.toNamed("/register");
-                            },
-                            child: Text(
-                              "Register now",
-                              style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.yellow,
+                        ),
+                        const SizedBox(height: 15),
+                        YellowButton(
+                          width: MediaQuery.of(context).size.width - 50,
+                          onPressed: signUserIn,
+                          iconUrl: 'lib/images/Login.svg',
+                          label: "Log In",
+                        ),
+                        const SizedBox(height: 15),
+                        const Row(
+                          children: [
+                            Expanded(
+                              child: Divider(
+                                thickness: 0.5,
+                                color: Colors.grey,
                               ),
                             ),
+                            Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 10),
+                              child: Text(
+                                "Or continue with",
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              child: Divider(
+                                thickness: 0.5,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 15),
+                        SizedBox(
+                          height: 40,
+                          child: GestureDetector(
+                            onTap: signInWithGoogle,
+                            child: Image.asset(
+                              "lib/images/google.png",
+                              fit: BoxFit.cover,
+                            ),
                           ),
-                        ],
-                      ),
-                    ],
-                  ),
+                        ),
+                        const SizedBox(height: 15),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Text(
+                              "Don't have any account?",
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: Colors.grey,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            GestureDetector(
+                              onTap: () {
+                                Get.toNamed("/register");
+                              },
+                              child: Text(
+                                "Register now",
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.yellow,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+            ),
           );
         },
       ),

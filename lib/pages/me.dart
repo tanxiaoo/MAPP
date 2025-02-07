@@ -152,8 +152,8 @@ class _MePageState extends State<MePage> {
                         padding: const EdgeInsets.symmetric(vertical: 15),
                         child: const Divider(),
                       ),
-                      const Text(
-                        "If you miss the train I’m on,\nYou will know that I am gone,\nYou can hear the whistle blow\nA hundred miles...\n",
+                       const Text(
+              "If you miss the train I’m on,\nYou will know that I am gone,\nYou can hear the whistle blow\nA hundred miles.\nA hundred miles, a hundred miles,\nA hundred miles, a hundred miles,\nYou can hear the whistle blow\nA hundred miles.\nLord, I’m one, Lord, I’m two,\nLord, I’m three, Lord, I’m four,\nLord, I’m five hundred miles\nAway from home.\nAway from home, away from home,\nAway from home, away from home,\nLord, I’m five hundred miles\n...",
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 14,
@@ -205,8 +205,8 @@ class _MePageState extends State<MePage> {
                   padding: const EdgeInsets.symmetric(vertical: 15),
                   child: const Divider(),
                 ),
-                const Text(
-                  "If you miss the train I’m on,\nYou will know that I am gone,\nYou can hear the whistle blow\nA hundred miles...\n",
+                 const Text(
+              "If you miss the train I’m on,\nYou will know that I am gone,\nYou can hear the whistle blow\nA hundred miles.\nA hundred miles, a hundred miles,\nA hundred miles, a hundred miles,\nYou can hear the whistle blow\nA hundred miles.\nLord, I’m one, Lord, I’m two,\nLord, I’m three, Lord, I’m four,\nLord, I’m five hundred miles\nAway from home.\nAway from home, away from home,\nAway from home, away from home,\nLord, I’m five hundred miles\n...",
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 12,

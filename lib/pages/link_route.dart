@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../components/yellow_button.dart';
 import '../const.dart';
+import 'package:intl/intl.dart';
 import '../components/firestore_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -46,6 +47,31 @@ class _LinkRoutePageState extends State<LinkRoutePage> {
     });
   }
 
+  void _pickDate() async {
+    DateTime? picked = await showDatePicker(
+        context: context,
+        firstDate: DateTime.now(),
+        lastDate: DateTime.now().add(const Duration(days: 365)));
+    if (picked != null) {
+      setState(() {
+        selectedDate = picked;
+      });
+    }
+  }
+
+  Future<void> _selectedDateRange() async {
+    DateTimeRange? picked = await showDateRangePicker(
+        context: context,
+        firstDate: DateTime.now(),
+        lastDate: DateTime.now().add(const Duration(days: 365)));
+
+    if (picked != null && picked != selectedDateRange) {
+      setState(() {
+        selectedDateRange = picked;
+      });
+    }
+  }
+
   List<Map<String, String>> getTrainRoutes() {
     List<Map<String, String>> trainRoutes = [];
 
@@ -71,7 +97,7 @@ class _LinkRoutePageState extends State<LinkRoutePage> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text(
-          "Ticket Details - $routeKey",
+          routeKey,
           style: TextStyle(fontSize: 16, color: Colors.green),
         ),
         content: Column(
@@ -114,7 +140,7 @@ class _LinkRoutePageState extends State<LinkRoutePage> {
       return {};
     }
 
-    return {
+    Map<String, dynamic> planData = {
       "userId": userId,
       "planName": planName,
       "date": selectedDateRange != null
@@ -142,6 +168,12 @@ class _LinkRoutePageState extends State<LinkRoutePage> {
         };
       }).toList(),
     };
+
+    if (selectedTickets.isNotEmpty) {
+      planData["selectedTickets"] = selectedTickets;
+    }
+
+    return planData;
   }
 
   Future<void> _showPlanNameDialog() async {
@@ -167,7 +199,7 @@ class _LinkRoutePageState extends State<LinkRoutePage> {
                 String planName = nameController.text.trim();
                 if (planName.isNotEmpty) {
                   Navigator.of(context).pop();
-                  _savePlan(planName);
+                  _savePlan(planName); 
                 } else {
                   Get.snackbar("Error", "Plan name cannot be empty!");
                 }
@@ -193,246 +225,168 @@ class _LinkRoutePageState extends State<LinkRoutePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: const Text("link "),
-          titleTextStyle: const TextStyle(
-            color: AppColors.white,
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-          ),
-          backgroundColor: AppColors.green,
+      appBar: AppBar(
+        title: const Text("link "),
+        titleTextStyle: const TextStyle(
+          color: AppColors.white,
+          fontSize: 14,
+          fontWeight: FontWeight.bold,
         ),
-        body: LayoutBuilder(
-          builder: (context, constraints) {
-            bool isTablet = constraints.maxWidth > 800;
-            double itemWidth =
-                isTablet ? constraints.maxWidth / 2 - 24 : constraints.maxWidth;
-
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: SingleChildScrollView(
-                child: isTablet
-                    ? Wrap(
-                        spacing: 16,
-                        runSpacing: 10,
-                        children: List.generate(widget.waypointsTitles.length,
-                            (index) {
-                          String waypoint = widget.waypointsTitles[index];
-                          String routeKey = "${index}_${index + 1}";
-                          List transportDetails =
-                              widget.routeDetails[routeKey] ?? [];
-
-                          return SizedBox(
-                            width: itemWidth,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    CircleAvatar(
-                                      radius: 12,
-                                      backgroundColor: Colors.blue,
-                                      child: Text(
-                                        "${index + 1}",
-                                        style: const TextStyle(
-                                            color: Colors.white),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Expanded(
-                                      child: Text(
-                                        waypoint,
-                                        textAlign: TextAlign.left,
-                                        style: const TextStyle(fontSize: 16),
-                                      ),
-                                    ),
-                                    IconButton(
-                                      onPressed: () => _toggleExpand(index),
-                                      icon: Icon(
-                                        expandedState[index] ?? false
-                                            ? Icons.expand_less
-                                            : Icons.expand_more,
-                                        color: Colors.grey,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                if ((expandedState[index] ?? false) &&
-                                    transportDetails.isNotEmpty)
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      const Divider(
-                                          thickness: 0.5, color: Colors.grey),
-                                      ...transportDetails.map<Widget>((detail) {
-                                        bool isWalking =
-                                            detail['mode'].toLowerCase() ==
-                                                "walking";
-                                        return Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Row(
-                                              children: [
-                                                _getTransportIcon(
-                                                    detail['mode'],
-                                                    departure:
-                                                        detail['departure'],
-                                                    arrival: detail['arrival']),
-                                                const SizedBox(width: 6),
-                                                Expanded(
-                                                  child: Text(
-                                                    "${detail['mode']}${detail['line'].isNotEmpty ? ' - ${detail['line']}' : ''}",
-                                                    style: const TextStyle(
-                                                      fontSize: 14,
-                                                      color: Colors.black87,
-                                                    ),
-                                                  ),
-                                                ),
-                                                Text(
-                                                  "${detail['distance']} | ${detail['duration']}",
-                                                  style: const TextStyle(
-                                                    fontSize: 12,
-                                                    fontWeight: FontWeight.w500,
-                                                    color: Colors.grey,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                            if (!isWalking)
-                                              Text(
-                                                "${detail['departure']} → ${detail['arrival']}",
-                                                style: const TextStyle(
-                                                  fontSize: 12,
-                                                  color: Colors.grey,
-                                                ),
-                                              ),
-                                            const SizedBox(height: 6),
-                                          ],
-                                        );
-                                      }),
-                                      const Divider(
-                                          thickness: 0.5, color: Colors.grey),
-                                    ],
-                                  ),
-                              ],
-                            ),
-                          );
-                        }),
-                      )
-                    : Column(
-                        children: List.generate(widget.waypointsTitles.length,
-                            (index) {
-                          String waypoint = widget.waypointsTitles[index];
-                          String routeKey = "${index}_${index + 1}";
-                          List transportDetails =
-                              widget.routeDetails[routeKey] ?? [];
-
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  CircleAvatar(
-                                    radius: 12,
-                                    backgroundColor: Colors.blue,
-                                    child: Text(
-                                      "${index + 1}",
-                                      style:
-                                          const TextStyle(color: Colors.white),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text(
-                                      waypoint,
-                                      textAlign: TextAlign.left,
-                                      style: const TextStyle(fontSize: 16),
-                                    ),
-                                  ),
-                                  IconButton(
-                                    onPressed: () => _toggleExpand(index),
-                                    icon: Icon(
-                                      expandedState[index] ?? false
-                                          ? Icons.expand_less
-                                          : Icons.expand_more,
-                                      color: Colors.grey,
-                                    ),
-                                  ),
-                                ],
+        backgroundColor: AppColors.green,
+      ),
+      body: Padding(
+            padding: EdgeInsets.fromLTRB(16, 0, 16, 0),
+            child: Column(
+              children: [
+                Text("When do you want to visit?"),
+                GestureDetector(
+                  onTap: _selectedDateRange,
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Icon(Icons.calendar_today, color: Colors.grey),
+                        Text(
+                          selectedDateRange == null
+                              ? "Select travel dates"
+                              : "${DateFormat("EEE, d MMM").format(selectedDateRange!.start)} - "
+                                  "${DateFormat("EEE, d MMM").format(selectedDateRange!.end)}",
+                          style: const TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.w500),
+                        ),
+                        const Icon(Icons.arrow_drop_down, color: Colors.grey),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+                Expanded(
+                    child: ListView.builder(
+                  itemCount: widget.waypointsTitles.length * 2 - 1,
+                  itemBuilder: (context, index) {
+                    if (index.isEven) {
+                      // attractin info
+                      int actualIndex = index ~/ 2;
+                      return Column(
+                        children: [
+                          ListTile(
+                            contentPadding:
+                                EdgeInsets.symmetric(horizontal: 12),
+                            dense: true,
+                            visualDensity: VisualDensity.compact,
+                            leading: CircleAvatar(
+                              radius: 12,
+                              backgroundColor: Colors.blue,
+                              child: Text(
+                                "${actualIndex + 1}",
+                                style: const TextStyle(color: Colors.white),
                               ),
-                              if ((expandedState[index] ?? false) &&
-                                  transportDetails.isNotEmpty)
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Divider(
-                                        thickness: 0.5, color: Colors.grey),
-                                    ...transportDetails.map<Widget>((detail) {
-                                      bool isWalking =
-                                          detail['mode'].toLowerCase() ==
-                                              "walking";
-                                      return Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Row(
-                                            children: [
-                                              _getTransportIcon(detail['mode'],
-                                                  departure:
-                                                      detail['departure'],
-                                                  arrival: detail['arrival']),
-                                              const SizedBox(width: 6),
-                                              Expanded(
-                                                child: Text(
-                                                  "${detail['mode']}${detail['line'].isNotEmpty ? ' - ${detail['line']}' : ''}",
-                                                  style: const TextStyle(
-                                                    fontSize: 14,
-                                                    color: Colors.black87,
-                                                  ),
-                                                ),
-                                              ),
-                                              Text(
-                                                "${detail['distance']} | ${detail['duration']}",
+                            ),
+                            title: Text(
+                              widget.waypointsTitles[actualIndex],
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                            trailing: IconButton(
+                                onPressed: () => _toggleExpand(actualIndex),
+                                icon: Icon(
+                                  expandedState[actualIndex] ?? false
+                                      ? Icons.expand_less
+                                      : Icons.expand_more,
+                                  color: Colors.grey,
+                                )),
+                          ),
+                        ],
+                      );
+                    } else {
+                      int routeIndex = (index - 1) ~/ 2;
+                      String routeKey = "${routeIndex}_${routeIndex + 1}";
+                      List transportDetails =
+                          widget.routeDetails[routeKey] ?? [];
+
+                      return (expandedState[routeIndex] ?? false) &&
+                              transportDetails.isNotEmpty
+                          ? Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 16.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Divider(
+                                    thickness: 0.5,
+                                    color: Colors.grey,
+                                  ),
+                                  ...transportDetails.map<Widget>((detail) {
+                                    bool isWalking =
+                                        detail['mode'].toLowerCase() ==
+                                            "walking";
+                                    return Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            _getTransportIcon(detail['mode'],
+                                                departure: detail['departure'],
+                                                arrival: detail['arrival']),
+                                            const SizedBox(width: 6),
+                                            Expanded(
+                                              child: Text(
+                                                "${detail['mode']}${detail['line'].isNotEmpty ? ' - ${detail['line']}' : ''}",
                                                 style: const TextStyle(
-                                                  fontSize: 12,
-                                                  fontWeight: FontWeight.w500,
-                                                  color: Colors.grey,
+                                                  fontSize: 14,
+                                                  color: Colors.black87,
                                                 ),
                                               ),
-                                            ],
-                                          ),
-                                          if (!isWalking)
+                                            ),
                                             Text(
-                                              "${detail['departure']} → ${detail['arrival']}",
+                                              "${detail['distance']} | ${detail['duration']}",
                                               style: const TextStyle(
                                                 fontSize: 12,
+                                                fontWeight: FontWeight.w500,
                                                 color: Colors.grey,
                                               ),
                                             ),
-                                          const SizedBox(height: 6),
-                                        ],
-                                      );
-                                    }),
-                                    const Divider(
-                                        thickness: 0.5, color: Colors.grey),
-                                  ],
-                                ),
-                            ],
-                          );
-                        }),
-                      ),
-              ),
-            );
-          },
-        ),
+                                          ],
+                                        ),
+                                        if (!isWalking)
+                                          Text(
+                                            "${detail['departure']} → ${detail['arrival']}",
+                                            style: const TextStyle(
+                                              fontSize: 12,
+                                              color: Colors.grey,
+                                            ),
+                                          ),
+                                        const SizedBox(height: 6),
+                                      ],
+                                    );
+                                  }),
+                                  const Divider(
+                                    thickness: 0.5,
+                                    color: Colors.grey,
+                                  ),
+                                ],
+                              ),
+                            )
+                          : const SizedBox();
+                    }
+                  },
+                )),
+              ],
+            )),
         bottomNavigationBar: Padding(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
           child:
               Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
             YellowButton(
-              onPressed: _showPlanNameDialog,
+              onPressed: _showPlanNameDialog, 
               iconUrl: 'lib/images/plan_save.svg',
               label: "Save Plan",
             ),
@@ -454,7 +408,8 @@ class _LinkRoutePageState extends State<LinkRoutePage> {
               label: "Buy Tickets",
             ),
           ]),
-        ));
+        )
+      );
   }
 
   Widget _getTransportIcon(String mode, {String? departure, String? arrival}) {

@@ -42,7 +42,7 @@ List<Map<String, dynamic>> listData = [
       "https://images.unsplash.com/photo-1498307833015-e7b400441eb8?q=80&w=1528&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", // Saint Mark's Basilica
     ],
     "distance": "270 km from Milan",
-    "coordinates": {"latitude": 45.4408, "longitude": 12.3155},
+    "coordinates": {"latitude": 45.4407369, "longitude": 12.3215815},
   },
   {
     "title": "Lake Como",
@@ -57,7 +57,7 @@ List<Map<String, dynamic>> listData = [
       "https://images.unsplash.com/photo-1610805823165-941e210ee823?q=80&w=1469&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", // / Boat tour
     ],
     "distance": "50 km from Milan",
-    "coordinates": {"latitude": 46.016544, "longitude": 9.257221},
+    "coordinates": {"latitude": 45.8119, "longitude": 9.0832}, 
   },
   {
     "title": "Verona",
@@ -72,6 +72,6 @@ List<Map<String, dynamic>> listData = [
       "https://images.unsplash.com/photo-1551806580-e668327b0611?q=80&w=1469&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", // Historic streets
     ],
     "distance": "160 km from Milan",
-    "coordinates": {"latitude": 45.4384, "longitude": 10.9916},
+    "coordinates": {"latitude": 45.4398265, "longitude": 10.9891693},
   },
 ];

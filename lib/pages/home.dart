@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/const.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geocoding/geocoding.dart' as geocoding;
@@ -180,8 +181,14 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        title: const Text("home"),
-      ),
+              title: const Text("Home"),
+              titleTextStyle: const TextStyle(
+                color: AppColors.white,
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+              ),
+              backgroundColor: AppColors.green,
+            ),
       body: LayoutBuilder(
         builder: (context, constraints) {
           bool isTablet = constraints.maxWidth > 800; 
